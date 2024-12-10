@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:8.0  # MySQL 컨테이너 이미지
+    container_name: localboard_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: board
+      TZ : "Asia/Seoul"
+    ports:
+      - "3307:3306"
+  
+  app:
+    image: localboard  # 이미 빌드된 Spring 애플리케이션 이미지
+    container_name: localboard_app
+    ports:
+      - "8090:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:mysql://localboard_mysql:3306/board?useSSL=false"
+      SPRING_DATASOURCE_USERNAME: "root"
+      SPRING_DATASOURCE_PASSWORD: "1234"
+      TZ : "Asia/Seoul"

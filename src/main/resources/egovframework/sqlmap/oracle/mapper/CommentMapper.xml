@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovframework.LocalBoard.mapper.CommentMapper">
+
+    <resultMap id="comment" type="egovframework.LocalBoard.dto.Comment">
+        <result property="parentCommentId" column="parent_comment_id"/>
+        <result property="commentId" column="comment_id"/>
+        <result property="content" column="content"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="level" column="level"/>
+
+        <!-- Comment의 Article 정보 매핑 -->
+        <association property="article" javaType="egovframework.LocalBoard.dto.Article">
+            <result property="articleId" column="article_id"/>
+            <result property="title" column="title"/>
+            <result property="content" column="content"/>
+            <result property="views" column="views"/>
+            <result property="createdAt" column="created_at"/>
+
+            <!-- Article의 User 정보 매핑 -->
+            <association property="user" javaType="egovframework.LocalBoard.dto.User">
+                <result property="id" column="user_id"/>
+                <result property="loginId" column="login_id"/>
+                <result property="nickname" column="nickname"/>
+                <result property="pwd" column="pwd"/>
+            </association>
+        </association>
+
+        <!-- Comment의 User 정보 매핑 -->
+        <association property="user" javaType="egovframework.LocalBoard.dto.User">
+            <result property="id" column="user_id"/>
+            <result property="loginId" column="login_id"/>
+            <result property="nickname" column="nickname"/>
+            <result property="pwd" column="pwd"/>
+        </association>
+    </resultMap>
+
+	<delete id="removeCommentByUserId" parameterType="int">
+		DELETE FROM comments
+		WHERE user_id = #{userId}
+	</delete>
+
+	<delete id="removeCommentByArticleId" parameterType="int">
+		DELETE FROM comments
+		WHERE article_id = #{articleId}
+	</delete>
+	
+	<select id="getRootComments" parameterType="int" resultMap="comment">
+	    SELECT c.comment_id, c.content,  c.user_id, c.parent_comment_id,
+	           c.article_id, c.created_at, c.is_deleted, u.nickname
+	    FROM comments c
+	    	JOIN users u
+	    	ON c.user_id = u.id
+	    WHERE c.article_id = #{articleId} AND c.parent_comment_id IS NULL
+	    ORDER BY c.comment_id DESC;
+	</select>
+	
+	<!-- 특정 댓글과 관련된 모든 하위 댓글 가져오기 -->
+	<select id="getRepliesByCommentId" resultMap="comment">
+	    WITH RECURSIVE CommentHierarchy AS (
+	        SELECT 
+	            c.comment_id,
+	            c.content,
+	            c.user_id,
+	            c.parent_comment_id,
+	            c.article_id,
+	            c.created_at,
+	            c.is_deleted,
+	            1 AS level,
+	            CAST(c.comment_id AS CHAR(255)) AS hierarchy_path,
+	            u.nickname
+	        FROM 
+	            comments c
+	        JOIN 
+	            users u ON c.user_id = u.id
+	        WHERE 
+	            c.parent_comment_id = #{commentId}
+	        
+	        UNION ALL
+	
+	        SELECT 
+	            c.comment_id,
+	            c.content,
+	            c.user_id,
+	            c.parent_comment_id,
+	            c.article_id,
+	            c.created_at,
+	            c.is_deleted,
+	            ch.level + 1 AS level,
+	            CONCAT(ch.hierarchy_path, '-', c.comment_id) AS hierarchy_path,
+	            u.nickname
+	        FROM 
+	            comments c
+	        INNER JOIN 
+	            CommentHierarchy ch ON c.parent_comment_id = ch.comment_id
+	        JOIN 
+	            users u ON c.user_id = u.id
+	    )
+	    SELECT 
+	        comment_id,
+	        content,
+	        user_id,
+	        parent_comment_id,
+	        article_id,
+	        created_at,
+	        is_deleted,
+	        level,
+	        hierarchy_path,
+	        nickname
+	    FROM 
+	        CommentHierarchy
+	    ORDER BY 
+	        hierarchy_path ASC
+	</select>
+
+	
+	<insert id="writeComment" parameterType="map" useGeneratedKeys="true" keyProperty="commentId">
+	    INSERT INTO comments (
+	        article_id,
+	        user_id,
+	        content,
+	        parent_comment_id
+	    )
+	    VALUES (
+	        #{articleId},
+	        #{userId},
+	        #{content},
+	        <choose>
+	            <when test="parentCommentId == null or parentCommentId == 0">
+	                NULL
+	            </when>
+	            <otherwise>
+	                #{parentCommentId, jdbcType=INTEGER}
+	            </otherwise>
+	        </choose>
+	    )
+	</insert>
+	
+    <update id="updateComment" parameterType="map">
+    	UPDATE comments
+    	SET content = #{content}
+    	WHERE comment_id = #{commentId}
+    </update>
+	
+	<update id="removeComment" parameterType="int">
+		UPDATE comments
+		SET is_deleted = 1
+		WHERE comment_id = #{commentId}
+	</update>
+
+    <select id="getCommentById" parameterType="Integer" resultMap="comment">
+	    SELECT c.comment_id, c.article_id, c.user_id, c.parent_comment_id,
+	           c.content, c.created_at,u.nickname
+	    FROM comments c
+	    	JOIN users u
+	    	ON c.user_id = u.id
+	    WHERE c.comment_id = #{commentId}
+    </select>
+	
+</mapper>
