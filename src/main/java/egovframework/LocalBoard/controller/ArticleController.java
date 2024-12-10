@@ -381,7 +381,6 @@ public class ArticleController {
 		
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("userId", user.getId());
-//		params.put("offset", offset);
 		
 		return articleService.getArticlesByUserIdWithLimit(params);
 	}
