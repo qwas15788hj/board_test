@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovframework.LocalBoard.mapper.UserMapper">
+    <resultMap id="user" type="egovframework.LocalBoard.dto.User">
+        <result property="id" column="id"/>
+        <result property="loginId" column="login_id"/>
+        <result property="nickname" column="nickname"/>
+        <result property="pwd" column="pwd"/>
+    </resultMap>
+    
+    <select id="findByLoginId" parameterType="String" resultMap="user">
+	    SELECT id, login_id, nickname, pwd
+	    FROM users
+	    WHERE BINARY login_id = #{loginId}
+	</select>
+    
+	<insert id="join" parameterType="map">
+	    INSERT INTO users (login_id, nickname, pwd)
+	    VALUES (#{loginId}, #{nickname}, #{pwd})
+	</insert>
+    
+    <select id="checkId" resultType="int" parameterType="string">
+    	SELECT COUNT(*)
+    	FROM users
+    	WHERE BINARY login_id = #{loginId}
+    </select>
+    
+	<update id="modifyUserProfile" parameterType="egovframework.LocalBoard.dto.User">
+	    UPDATE users
+	    SET nickname = #{nickname}, pwd = #{pwd}
+	    WHERE id = #{id}
+	</update>
+	
+	<delete id="removeUser" parameterType="int">
+		DELETE FROM users WHERE id = #{userId}
+	</delete>
+	
+</mapper>

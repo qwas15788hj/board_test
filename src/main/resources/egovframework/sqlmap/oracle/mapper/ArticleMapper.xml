@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovframework.LocalBoard.mapper.ArticleMapper">
+
+    <resultMap id="article" type="egovframework.LocalBoard.dto.Article">
+        <result property="articleId" column="article_id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="views" column="views"/>
+        <result property="createdAt" column="created_at"/>
+
+        <!-- User 객체와의 관계 설정을 위한 association -->
+        <association property="user" column="user_id" javaType="egovframework.LocalBoard.dto.User">
+            <result property="id" column="user_id"/>
+            <result property="loginId" column="login_id"/>
+            <result property="nickname" column="nickname"/>
+            <result property="pwd" column="pwd"/>
+        </association>
+    </resultMap>
+    
+ 	<select id="getArticleList" resultMap="article" parameterType="egovframework.LocalBoard.dto.Pagination">
+	    SELECT a.article_id, a.title, a.content, a.created_at, a.views,
+	           u.id AS user_id, u.login_id, u.nickname, u.pwd
+	    FROM article a
+	        JOIN users u ON a.user_id = u.id
+	    <where>
+	        <!-- 검색 조건 추가 -->
+	        <if test="searchCondition == '제목' and searchKeyword != null and searchKeyword != ''">
+	            a.title LIKE CONCAT('%', #{searchKeyword}, '%')
+	        </if>
+	        <if test="searchCondition == '작성자' and searchKeyword != null and searchKeyword != ''">
+	            u.nickname LIKE CONCAT('%', #{searchKeyword}, '%')
+	        </if>
+	        <if test="searchCondition == '전체' and searchKeyword != null and searchKeyword != ''">
+	            (a.title LIKE CONCAT('%', #{searchKeyword}, '%') OR u.nickname LIKE CONCAT('%', #{searchKeyword}, '%'))
+	        </if>
+	        
+	        <!-- 시간 필터 조건 추가 -->
+	        <if test="timeRange == '1week'">
+	            AND a.created_at >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
+	        </if>
+	        <if test="timeRange == '1month'">
+	            AND a.created_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+	        </if>
+	        <if test="timeRange == '1year'">
+	            AND a.created_at >= DATE_SUB(NOW(), INTERVAL 1 YEAR)
+	        </if>
+	    </where>
+	     ORDER BY
+	    <choose>
+	        <when test="sortBy == 'views'">
+	            a.views ${sortOrder}, a.article_id DESC
+	        </when>
+	        <otherwise>
+	            a.article_id DESC
+	        </otherwise>
+	    </choose>
+	    LIMIT #{articleSize} OFFSET #{offset}
+	</select>
+	
+	<select id="getArticleCount" resultType="int" parameterType="egovframework.LocalBoard.dto.Pagination">
+	    SELECT COUNT(*)
+	    FROM article a
+	        JOIN users u ON a.user_id = u.id
+	    <where>
+	        <!-- 검색 조건 추가 -->
+	        <if test="searchCondition == '제목' and searchKeyword != null and searchKeyword != ''">
+	            a.title LIKE CONCAT('%', #{searchKeyword}, '%')
+	        </if>
+	        <if test="searchCondition == '작성자' and searchKeyword != null and searchKeyword != ''">
+	            u.nickname LIKE CONCAT('%', #{searchKeyword}, '%')
+	        </if>
+	        <if test="searchCondition == '전체' and searchKeyword != null and searchKeyword != ''">
+	            (a.title LIKE CONCAT('%', #{searchKeyword}, '%') OR u.nickname LIKE CONCAT('%', #{searchKeyword}, '%'))
+	        </if>
+	        
+	        <!-- 시간 필터 조건 추가 -->
+	        <if test="timeRange == '1week'">
+	            AND a.created_at >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
+	        </if>
+	        <if test="timeRange == '1month'">
+	            AND a.created_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+	        </if>
+	        <if test="timeRange == '1year'">
+	            AND a.created_at >= DATE_SUB(NOW(), INTERVAL 1 YEAR)
+	        </if>
+	    </where>
+	</select>
+		
+    <insert id="saveArticle" parameterType="egovframework.LocalBoard.dto.Article">
+    	INSERT INTO article(user_id, title, content, created_at, views)
+    	VALUES (#{user.id}, #{title}, #{content}, NOW(), 0)
+    </insert>
+    
+    <select id="getArticle" parameterType="int" resultMap="article">
+    	SELECT a.article_id, a.user_id, a.title, a.content, a.views, a.created_at, u.nickname
+    	FROM article a
+    		JOIN users u
+    		ON a.user_id = u.id
+    	WHERE article_id = #{articleId}
+    </select>
+    
+    <update id="addViews" parameterType="int">
+    	UPDATE article SET views = views + 1
+    	WHERE article_id = #{articleId}
+    </update>
+    
+    <update id="articleUpdate">
+    	UPDATE article SET content = #{content} WHERE article_id = #{articleId}
+    </update>
+
+    <delete id="articleDetele" parameterType="int">
+    	DELETE FROM article WHERE article_id = #{articleId}
+    </delete>
+    
+	<delete id="removeArticleByUserId" parameterType="int">
+		DELETE FROM article WHERE user_id = #{userId}
+	</delete>
+	
+	<select id="getArticleCountByUserId" parameterType="int" resultType="int">
+		SELECT count(*)
+		FROM article
+		WHERE user_id = #{userId}
+	</select>
+    
+    <select id="getArticlesByUserIdWithLimit" parameterType="map" resultMap="article">
+    	SELECT article_id, title, created_at, views
+        FROM article
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC
+    </select>
+
+</mapper>
