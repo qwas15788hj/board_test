@@ -96,6 +96,7 @@ public class ArticleController {
 	    if (pageIndexInt > totalPage) {
 	        pageIndexInt = totalPage;
 	    }
+	    
 	    logger.info("Pagination Info - pageIndexInt : {}, pagination.pageIndex: {}", pageIndexInt, pagination.getPageIndex());
 	    // Pagination에 현재 페이지 인덱스와 게시물 크기 설정
 	    pagination.setPageIndex(pageIndexInt);
@@ -135,13 +136,13 @@ public class ArticleController {
 	public String saveArticle(@RequestParam("title") String title,
 								@RequestParam("content") String content,
 								HttpServletRequest request) {
-		logger.info(title);
-		logger.info(content);
+		
 		User user = (User) request.getSession().getAttribute("user");
 		if (user != null) {
 			articleService.saveArticle(user, title, content);
 		}
 		return "redirect:/article/articleList";
+		
 	}
 	
 	// 게시글 내용 확인 페이지 이동
@@ -314,6 +315,7 @@ public class ArticleController {
 		OutputStream out = null;
 		//파일을 가져오기 위해 MultipartHttpServletRequest 의 getFile 메서드 사용
 		MultipartFile file = multiFile.getFile("upload");
+		
 		//파일이 비어있지 않고(비어 있다면 null 반환)
 		if (file != null) {
 			// 파일 사이즈가 0보다 크고, 파일이름이 공백이 아닐때
