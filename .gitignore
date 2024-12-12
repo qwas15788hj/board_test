@@ -11,6 +11,7 @@ out/
 .classpath
 .project
 .settings/
+/.metadata
 
 # OS에서 생성하는 불필요한 파일
 .DS_Store
