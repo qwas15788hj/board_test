@@ -370,6 +370,7 @@
 	            `;
 
 	            if (targetContainer) {
+	            	console.log("targetContainer 발견 : ", targetContainer);
 	                targetContainer.before(newReplyHtml);
 	            } else {
 	                // 적절한 위치를 찾지 못한 경우, 루트 댓글로 올라가서 해당 루트의 마지막에 추가
@@ -379,9 +380,35 @@
 	                    rootElement.append(newReplyHtml); // 루트 댓글의 마지막에 추가
 	                } else {
 	                    console.log("루트 요소를 찾을 수 없음");
-	                    // 루트를 찾지 못한 경우 기본 부모 아래에 추가 (기존 방식)
+
+	                    // 현재 parentCommentId에서 가장 가까운 commentListContainer 밑의 comment id 찾기
+	                    let closestParentId = null;
+	                    $(`#comment-\${parentCommentId}`)
+	                        .parentsUntil("#commentListContainer")
+	                        .each(function () {
+	                            const parentId = $(this).attr("id");
+	                            if (parentId && parentId.startsWith("comment-")) {
+	                                closestParentId = parentId.split("-")[1];
+	                                return false; // break out of each loop
+	                            }
+	                        });
+
+	                    // 최상위 parentId를 기반으로 commentListContainer 바로 아래의 id를 설정
+	                    if (closestParentId) {
+	                        console.log("찾은 최상위 parentId:", closestParentId);
+	                        parentCommentId = closestParentId;
+	                    }
+
+	                    // 추가하려는 댓글이 이미 존재하는지 확인
+	                    if ($(`#comment-\${newComment.commentId}`).length > 0) {
+	                        console.log("중복 댓글 발견, 추가하지 않음:", newComment.commentId);
+	                        return;
+	                    }
+
+	                    // 루트를 찾지 못한 경우 commentListContainer 바로 아래에 추가
 	                    $(`#comment-\${parentCommentId}`).append(newReplyHtml);
 	                }
+
 	            }
 	        }
 
