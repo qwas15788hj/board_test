@@ -56,9 +56,7 @@ public class UserController {
 						@RequestParam("pwd") String pwd,
 						HttpServletRequest request) {
 		
-		logger.info("로그인체크 시작!");
 	    User findUser = userService.findByLoginId(loginId);
-	    logger.info("DB 유저 확인 종료");
 	    if (findUser == null) {
 	        return "redirect:/user/login?error=true";
 	    }
