@@ -34,6 +34,14 @@
                                 <!-- CKEditor 적용할 textarea -->
                                 <textarea name="content" id="content" rows="10" style="width: 100%; height: 300px;" class="form-control" placeholder="내용을 입력하세요" required></textarea>
                             </div>
+							<div class="d-flex align-items-center mb-3">
+							    <label class="form-label me-3"><strong>첨부파일:</strong></label>
+							    <button type="button" class="btn btn-primary" onclick="document.getElementById('fileUpload').click()">파일 선택</button>
+							</div>
+							<!-- 숨겨진 파일 입력 -->
+							<input type="file" id="fileUpload" name="file" class="d-none" accept=".txt,.png,.jpg,.jpeg,.gif,.mp4,.avi,.mov" onchange="handleFileUpload()" multiple />
+							<!-- 파일 목록을 표시할 div -->
+							<div id="fileList" class="mt-3"></div>
                             <div class="d-flex justify-content-between">
                                 <button type="button" class="btn btn-primary" onclick="submitContents()">저장</button>
                                 <button type="button" class="btn btn-secondary" onclick="location.href='${pageContext.request.contextPath}/article/articleList?pageIndex=${pageIndex}&searchCondition=${searchCondition}&searchKeyword=${searchKeyword}&timeRange=${timeRange}&sortBy=${sortBy}&sortOrder=${sortOrder}'">돌아가기</button>
@@ -87,6 +95,78 @@
             document.getElementById("writeForm").submit();
         }
         
+     	// 파일 목록을 저장할 배열
+        let uploadedFiles = [];
+
+        // 파일 업로드 처리 함수
+        function handleFileUpload() {
+        	console.log(uploadedFiles);
+            const fileInput = document.getElementById("fileUpload");
+            const selectedFileName = document.getElementById("selectedFileName");
+            const files = Array.from(fileInput.files); // 새로 선택된 파일들
+            const allowedExtensions = /(\.txt|\.png|\.jpg|\.jpeg|\.gif|\.mp4|\.avi|\.mov)$/i;
+            const maxSize = 10 * 1024 * 1024; // 최대 파일 크기 10MB
+            const maxFiles = 5; // 최대 파일 개수
+
+            for (const file of files) {
+                // 파일 개수 초과 검사
+                if (uploadedFiles.length >= maxFiles) {
+                    alert(`최대 \${maxFiles}개의 파일만 업로드할 수 있습니다.`);
+                    break;
+                }
+
+                // 파일 형식 검사
+                if (!allowedExtensions.exec(file.name)) {
+                    alert(`\${file.name}은(는) 허용되지 않는 파일 형식입니다.`);
+                    continue;
+                }
+
+                // 파일 크기 검사
+                if (file.size > maxSize) {
+                    alert(`\${file.name}의 크기가 너무 큽니다. 최대 10MB까지 허용됩니다.`);
+                    continue;
+                }
+
+                // 유효한 파일이면 배열에 추가
+                uploadedFiles.push(file);
+            }
+
+            // 파일 목록 UI 업데이트
+            updateFileList();
+
+            // 파일 입력 초기화
+            fileInput.value = "";
+        }
+
+        // 파일 목록 UI 업데이트 함수
+        function updateFileList() {
+            const fileListDiv = document.getElementById("fileList");
+            fileListDiv.innerHTML = ""; // 기존 목록 초기화
+
+            uploadedFiles.forEach((file, index) => {
+                // 파일 이름 표시
+                const fileItem = document.createElement("div");
+                fileItem.classList.add("d-flex", "justify-content-between", "align-items-center", "p-2", "border", "rounded", "mb-2");
+
+                const fileName = document.createElement("span");
+                fileName.textContent = `\${file.name} (\${(file.size / 1024).toFixed(1)} KB)`; // 파일 이름과 크기 표시
+
+                // 삭제 버튼
+                const removeButton = document.createElement("button");
+                removeButton.textContent = "삭제";
+                removeButton.classList.add("btn", "btn-danger", "btn-sm");
+                removeButton.onclick = () => {
+                    uploadedFiles.splice(index, 1); // 배열에서 파일 제거
+                    updateFileList(); // 목록 업데이트
+                };
+
+                fileItem.appendChild(fileName);
+                fileItem.appendChild(removeButton);
+                fileListDiv.appendChild(fileItem);
+            });
+        }
+
+
     </script>
 </body>
 </html>
