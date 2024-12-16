@@ -23,8 +23,8 @@
                         <h3>글 작성</h3>
                     </div>
                     <div class="card-body">
-                        <!-- 새 URL을 사용하여 폼 전송 설정 -->
-                        <form id="writeForm" action="${pageContext.request.contextPath}/article/saveArticle" method="post">
+                        <%-- <!-- 새 URL을 사용하여 폼 전송 설정 -->
+                        <form id="writeForm" action="${pageContext.request.contextPath}/article/saveArticle" method="post" enctype="multipart/form-data">
                             <div class="mb-3">
                                 <label for="title" class="form-label"><strong>제목:</strong></label>
                                 <input type="text" name="title" id="title" class="form-control" placeholder="제목을 입력하세요" required>
@@ -40,13 +40,35 @@
 							</div>
 							<!-- 숨겨진 파일 입력 -->
 							<input type="file" id="fileUpload" name="file" class="d-none" accept=".txt,.png,.jpg,.jpeg,.gif,.mp4,.avi,.mov" onchange="handleFileUpload()" multiple />
+							<input type="file" name="files" id="fileUpload" multiple />
 							<!-- 파일 목록을 표시할 div -->
 							<div id="fileList" class="mt-3"></div>
                             <div class="d-flex justify-content-between">
                                 <button type="button" class="btn btn-primary" onclick="submitContents()">저장</button>
                                 <button type="button" class="btn btn-secondary" onclick="location.href='${pageContext.request.contextPath}/article/articleList?pageIndex=${pageIndex}&searchCondition=${searchCondition}&searchKeyword=${searchKeyword}&timeRange=${timeRange}&sortBy=${sortBy}&sortOrder=${sortOrder}'">돌아가기</button>
                             </div>
-                        </form>
+                        </form> --%>
+                        <div class="mb-3">
+						    <label for="title" class="form-label"><strong>제목:</strong></label>
+						    <input type="text" name="title" id="title" class="form-control" placeholder="제목을 입력하세요" required>
+						</div>
+						<div class="mb-3">
+						    <label for="content" class="form-label"><strong>내용:</strong></label>
+						    <!-- CKEditor 적용할 textarea -->
+						    <textarea name="content" id="content" rows="10" style="width: 100%; height: 300px;" class="form-control" placeholder="내용을 입력하세요" required></textarea>
+						</div>
+						<div class="d-flex align-items-center mb-3">
+						    <label class="form-label me-3"><strong>첨부파일:</strong></label>
+						    <button type="button" class="btn btn-primary" onclick="document.getElementById('fileUpload').click()">파일 선택</button>
+						</div>
+						<!-- 파일 입력 -->
+						<input type="file" id="fileUpload" class="d-none" accept=".txt,.png,.jpg,.jpeg,.gif,.mp4,.avi,.mov" onchange="handleFileUpload()" multiple />
+						<!-- 파일 목록을 표시할 div -->
+						<div id="fileList" class="mt-3"></div>
+						<div class="d-flex justify-content-between">
+						    <button type="button" class="btn btn-primary" onclick="submitContents()">저장</button>
+						    <button type="button" class="btn btn-secondary" onclick="location.href='${pageContext.request.contextPath}/article/articleList'">돌아가기</button>
+						</div>
                     </div>
                 </div>
             </div>
@@ -91,8 +113,35 @@
                 return false;
             }
 
-            // 유효성 검사를 통과하면 폼 제출
-            document.getElementById("writeForm").submit();
+            /* // 유효성 검사를 통과하면 폼 제출
+            document.getElementById("writeForm").submit(); */
+            
+         	// FormData 객체 생성
+            const formData = new FormData();
+            formData.append("title", title);
+            formData.append("content", content);
+
+            // uploadedFiles 배열을 FormData에 추가
+            uploadedFiles.forEach((file) => {
+                formData.append("files", file); // 'files' 키를 동일하게 반복 사용
+            });
+
+            // 서버로 데이터 전송
+            fetch("${pageContext.request.contextPath}/article/saveArticle", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.href = "${pageContext.request.contextPath}/article/articleList";
+                } else {
+                    alert("서버에서 오류가 발생했습니다.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("오류가 발생했습니다.");
+            });
         }
         
      	// 파일 목록을 저장할 배열

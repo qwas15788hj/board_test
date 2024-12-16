@@ -21,6 +21,15 @@
         </association>
     </resultMap>
     
+    <!-- ArticleFile 테이블 ResultMap -->
+    <resultMap id="articleFile" type="egovframework.LocalBoard.dto.ArticleFile">
+    	<result property="id" column="id"/>
+    	<result property="articleId" column="article_id"/>
+    	<result property="fileName" column="file_name"/>
+    	<result property="fileUrl" column="file_url"/>
+    	<result property="fileSize" column="file_size"/>
+   	</resultMap>
+    
  	<select id="getArticleList" resultMap="article" parameterType="egovframework.LocalBoard.dto.Pagination">
 	    SELECT a.article_id, a.title, a.content, a.created_at, a.views,
 	           u.id AS user_id, u.login_id, u.nickname, u.pwd
@@ -90,10 +99,15 @@
 	    </where>
 	</select>
 		
-    <insert id="saveArticle" parameterType="egovframework.LocalBoard.dto.Article">
+    <insert id="saveArticle" parameterType="egovframework.LocalBoard.dto.Article" useGeneratedKeys="true" keyProperty="articleId">
     	INSERT INTO article(user_id, title, content, created_at, views)
     	VALUES (#{user.id}, #{title}, #{content}, NOW(), 0)
     </insert>
+    
+    <insert id="saveFile" parameterType="egovframework.LocalBoard.dto.ArticleFile">
+    	INSERT INTO article_file (article_id, file_name, file_url, file_size)
+    	VALUES (#{articleId}, #{fileName}, #{fileUrl}, #{fileSize})
+   	</insert>
     
     <select id="getArticle" parameterType="int" resultMap="article">
     	SELECT a.article_id, a.user_id, a.title, a.content, a.views, a.created_at, u.nickname
@@ -131,6 +145,12 @@
         FROM article
         WHERE user_id = #{userId}
         ORDER BY created_at DESC
+    </select>
+    
+    <select id="getArticleFileByArticleId" parameterType="int" resultMap="articleFile">
+    	SELECT id, file_name, file_url, file_size
+    	FROM article_file
+    	WHERE article_id = #{articleId}
     </select>
 
 </mapper>

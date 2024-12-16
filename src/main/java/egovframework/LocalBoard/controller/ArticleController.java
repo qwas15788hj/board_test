@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import egovframework.LocalBoard.dto.Article;
+import egovframework.LocalBoard.dto.ArticleFile;
 import egovframework.LocalBoard.dto.Comment;
 import egovframework.LocalBoard.dto.Pagination;
 import egovframework.LocalBoard.dto.SmarteditorVO;
@@ -135,11 +137,12 @@ public class ArticleController {
 	@PostMapping("/saveArticle")
 	public String saveArticle(@RequestParam("title") String title,
 								@RequestParam("content") String content,
+								@RequestParam("files") MultipartFile[] files,
 								HttpServletRequest request) {
 		
 		User user = (User) request.getSession().getAttribute("user");
 		if (user != null) {
-			articleService.saveArticle(user, title, content);
+			articleService.saveArticle(user, title, content, files, request);
 		}
 		return "redirect:/article/articleList";
 		
@@ -160,9 +163,14 @@ public class ArticleController {
 	    User user = (User) request.getSession().getAttribute("user");
 	    model.addAttribute("user", user);
 	    
-	    logger.info("articleDetail article : " + article.toString());
-	    logger.info("articleDetail user : " + user.toString());
-
+	    List<ArticleFile> articleFiles = articleService.getArticleFileByArticleId(article);
+	    for (ArticleFile file : articleFiles) {
+	        double fileSizeInKB = file.getFileSize() / 1024.0;
+	        String roundedSize = String.format("%.1f", fileSizeInKB); // 소수점 첫째 자리 반올림
+	        file.setFormattedFileSize(roundedSize + "KB"); // 문자열로 저장
+	    }
+	    model.addAttribute("articleFiles", articleFiles);
+	    
 	    // 검색 조건 및 페이지네이션 정보 추가
 	    model.addAttribute("pageIndex", pageIndex);
 	    model.addAttribute("searchCondition", searchCondition);
@@ -386,5 +394,45 @@ public class ArticleController {
 		
 		return articleService.getArticlesByUserIdWithLimit(params);
 	}
+	
+	@GetMapping("/file/download")
+	public void downloadFile(@RequestParam("fileUrl") String fileUrl,
+	                         @RequestParam("fileName") String fileName,
+	                         HttpServletRequest request,
+	                         HttpServletResponse response) throws IOException {
+
+	    System.out.println("파일 다운로드 구현!");
+
+	    // 서버의 실제 업로드 파일 경로 설정
+	    String uploadPath = request.getServletContext().getRealPath("/resources/upload/");
+	    String fileUrlTrimmed = fileUrl.replace("/resources/upload/", ""); // 중복된 경로 제거
+	    String fullPath = uploadPath + fileUrlTrimmed;
+	    
+	    System.out.println("fileName: " + fileName);
+	    System.out.println("Upload Path: " + uploadPath);
+	    System.out.println("Full Path: " + fullPath);
+
+	    File file = new File(fullPath);
+
+	    if (file.exists()) {
+	        System.out.println("File exists: true");
+	        // ContentType 설정
+	        response.setContentType("application/octet-stream");
+	        response.setHeader("Content-Disposition", 
+	                "attachment; filename=\"" + URLEncoder.encode(fileName, "UTF-8") + "\"");
+	        response.setContentLength((int) file.length());
+
+	        // 파일을 응답 스트림으로 전달
+	        try (OutputStream out = response.getOutputStream()) {
+	            Files.copy(file.toPath(), out);
+	            out.flush();
+	        }
+	    } else {
+	        System.out.println("File exists: false");
+	        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+	        response.getWriter().write("File not found.");
+	    }
+	}
+
 
 }
