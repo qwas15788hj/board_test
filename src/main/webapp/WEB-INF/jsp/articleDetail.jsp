@@ -633,6 +633,22 @@
 	<div id="content" class="border mb-4" style="padding: 10px; white-space: pre;">
 		<c:out value="${article.content}" escapeXml="false"/>
 	</div>
+	
+	<!-- 첨부파일 목록 표시 -->
+	<c:if test="${not empty articleFiles}">
+	    <div class="mb-3">
+	        <label><strong>파일 목록</strong></label>
+	        <ul class="list-unstyled">
+	            <c:forEach var="file" items="${articleFiles}">
+	                <li>
+	                    <a href="${pageContext.request.contextPath}/article/file/download?fileUrl=${file.fileUrl}&fileName=${file.fileName}" download="${file.fileName}">
+	                        ${file.fileName} (${file.formattedFileSize})
+	                    </a>
+	                </li>
+	            </c:forEach>
+	        </ul>
+	    </div>
+	</c:if>
 
 	 <!-- 댓글 작성 폼 -->
     <div class="mb-4">

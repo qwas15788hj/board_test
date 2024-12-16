@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 
 import egovframework.LocalBoard.dto.Article;
+import egovframework.LocalBoard.dto.ArticleFile;
 import egovframework.LocalBoard.dto.Pagination;
 
 @Mapper
@@ -30,6 +31,10 @@ public interface ArticleMapper {
 	int getArticleCountByUserId(int userId);
 
 	List<Article> getArticlesByUserIdWithLimit(Map<String, Object> params);
+
+	void saveFile(ArticleFile articleFile);
+
+	List<ArticleFile> getArticleFileByArticleId(Article article);
 
 
 }
