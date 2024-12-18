@@ -24,7 +24,13 @@
 	let isIdChecked = false;
 
 	function checkId() {
-		const loginId = document.getElementById("loginId").value.trim();
+	    const loginIdField = document.getElementById("loginId");
+	    let loginId = loginIdField.value.trim(); // 중복 선언 제거
+
+	    // 실시간으로 띄어쓰기 제거
+	    loginId = loginId.replace(/\s/g, "");
+	    loginIdField.value = loginId;
+	    
 		console.log("join.jsp loginId 호출 : " + loginId);
 
 		// 아이디 유효성 검사 (영어, 숫자, 특수문자만 허용)
@@ -92,6 +98,18 @@
 			alert("이름을 입력하세요.");
 			return false;
 		}
+		
+		if(nickname === "관리자") {
+			alert("사용할 수 없는 이름입니다.");
+			return false;
+		}
+		
+	    // 닉네임 유효성 검사 (한글, 영어, 숫자만 허용)
+	    const nicknamePattern = /^[가-힣a-zA-Z0-9]+$/;
+	    if (!nicknamePattern.test(nickname)) {
+	        alert("이름은 한글, 영어, 숫자만 입력할 수 있습니다. 특수문자는 사용할 수 없습니다.");
+	        return false;
+	    }
 
 		return true;
 	}
@@ -113,9 +131,10 @@
 							<div class="mb-3">
 								<label for="loginId" class="form-label">ID:</label>
 								<div class="input-group">
-									<input type="text" name="loginId" id="loginId"
-										class="form-control" maxlength="20" placeholder="아이디를 입력하세요."
-										oninput="resetIdCheck()">
+								    <input type="text" name="loginId" id="loginId"
+								        class="form-control" maxlength="20" placeholder="아이디를 입력하세요."
+								        onkeydown="if (event.key === ' ') return false;" 
+								        oninput="resetIdCheck()">
 									<button type="button" class="btn btn-outline-secondary"
 										onclick="checkId()">아이디 체크</button>
 								</div>

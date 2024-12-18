@@ -92,6 +92,33 @@ public class CommentController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+    // 댓글 작성 이미지 추가를 위한 테스트 코드
+    @PostMapping("/writeTest")
+    public ResponseEntity<?> writeCommentTest(@RequestParam("articleId") int articleId,
+                                          @RequestParam("userId") int userId,
+                                          @RequestParam("parentCommentId") Integer parentCommentId,
+                                          @RequestParam("content") String content) {
+        try {
+            String decodedContent = content.replace("\\n", "\n");
+
+            Map<String, Object> paramMap = new HashMap<>();
+            paramMap.put("articleId", articleId);
+            paramMap.put("userId", userId);
+            paramMap.put("content", decodedContent);
+            paramMap.put("parentCommentId", parentCommentId);
+
+            Comment newComment = commentService.writeComment(paramMap);
+
+            // 명확한 JSON 반환
+            return ResponseEntity.ok().body(newComment);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", "댓글 작성 중 오류 발생");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
     
     @PostMapping("/update")
     public ResponseEntity<?> updateCommentTest(@RequestParam int commentId, 

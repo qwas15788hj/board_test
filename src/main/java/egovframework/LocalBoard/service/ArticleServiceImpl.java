@@ -2,6 +2,7 @@ package egovframework.LocalBoard.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -91,8 +92,41 @@ public class ArticleServiceImpl implements ArticleService {
 	}
 
 	@Override
-	public void articleUpdate(Map<String, Object> params) {
+	public void articleUpdate(Map<String, Object> params, List<Integer> existingFiles, MultipartFile[] files, HttpServletRequest request) {
 		articleMapper.articleUpdate(params);
+		
+		Map<String, Object> deleteParams = new HashMap<String, Object>();
+		deleteParams.put("articleId", (int) params.get("articleId"));
+		deleteParams.put("existingFiles", existingFiles);		
+		articleMapper.deleteFile(deleteParams);
+		
+		// 파일 저장 로직
+	    String uploadPath = request.getServletContext().getRealPath("/resources/upload/");
+	    File uploadDir = new File(uploadPath);
+	    if (!uploadDir.exists()) {
+	        uploadDir.mkdirs();
+	    }
+
+	    for (MultipartFile file : files) {
+	        if (!file.isEmpty()) {
+	            try {
+	                String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+	                File destination = new File(uploadPath, fileName);
+	                file.transferTo(destination);
+
+	                // DB에 파일 정보 저장
+	                ArticleFile articleFile = new ArticleFile();
+	                articleFile.setArticleId((int) params.get("articleId")); // 저장된 articleId 설정
+	                articleFile.setFileName(file.getOriginalFilename());
+	                articleFile.setFileUrl("/resources/upload/" + fileName);
+	                articleFile.setFileSize(file.getSize());
+	                articleMapper.saveFile(articleFile);
+	            } catch (IOException e) {
+	                e.printStackTrace();
+	            }
+	        }
+	    }
+	    
 	}
 
 	@Override

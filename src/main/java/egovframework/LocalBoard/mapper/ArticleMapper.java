@@ -36,5 +36,6 @@ public interface ArticleMapper {
 
 	List<ArticleFile> getArticleFileByArticleId(Article article);
 
+	void deleteFile(Map<String, Object> deleteParams);
 
 }
