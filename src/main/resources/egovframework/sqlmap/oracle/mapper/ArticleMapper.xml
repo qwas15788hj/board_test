@@ -152,5 +152,16 @@
     	FROM article_file
     	WHERE article_id = #{articleId}
     </select>
+    
+	<delete id="deleteFile" parameterType="map">
+	    DELETE FROM article_file
+	    WHERE article_id = #{articleId}
+	    <if test="existingFiles != null and existingFiles.size() > 0">
+	        AND id NOT IN
+	        <foreach item="fileId" collection="existingFiles" open="(" separator="," close=")">
+	            #{fileId}
+	        </foreach>
+	    </if>
+	</delete>
 
 </mapper>

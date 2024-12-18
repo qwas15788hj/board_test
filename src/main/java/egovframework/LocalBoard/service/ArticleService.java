@@ -18,7 +18,7 @@ public interface ArticleService {
 	int getArticleCount(Pagination pagination);
 	void saveArticle(User user, String title, String content, MultipartFile[] files, HttpServletRequest request);
 	Article articleDetail(int articleId);
-	void articleUpdate(Map<String, Object> params);
+	void articleUpdate(Map<String, Object> params, List<Integer> existingFiles, MultipartFile[] files, HttpServletRequest request);
 	void articleDelete(int articleId);
 	void addViews(int articleId);
 	void removeArticleByUserId(int userId);

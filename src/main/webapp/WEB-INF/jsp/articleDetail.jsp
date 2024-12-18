@@ -421,7 +421,82 @@
 	        alert("댓글 작성에 실패했습니다.");
 	    });
 	}
+	
+	// 댓글 이미지 추가를 위한 테스트 코드
+	function submitCommentTest(articleId, parentCommentId, level) {
+	    const contentField = parentCommentId === 0 
+	        ? document.getElementById("commentContent") 
+	        : document.getElementById(`replyContent-\${parentCommentId}`);
+	    
+	    const content = contentField.innerHTML.trim(); // contenteditable의 HTML 내용
+	    
+	    console.log("입력된 content 값:", content); // 입력된 값 확인
 
+	    // 유효성 검사
+	    if (!content || content === "" || content === "<br>") {
+	        alert("댓글 내용을 입력하세요.");
+	        return;
+	    }
+
+	    // 서버로 보낼 FormData 생성
+	    const formData = new FormData();
+	    formData.append("articleId", articleId);
+	    formData.append("userId", document.getElementById("userId").value);
+	    formData.append("parentCommentId", parentCommentId);
+	    formData.append("content", content); // HTML 그대로 보냄
+
+
+	    // 서버로 Fetch API를 사용해 POST 전송
+	    fetch("${pageContext.request.contextPath}/comment/writeTest", {
+	        method: "POST",
+	        body: formData
+	    })
+	    .then(response => {
+	        if (!response.ok) {
+	            throw new Error("댓글 작성 실패");
+	        }
+	        return response.json();
+	    })
+	    .then(newComment => {
+	        console.log("댓글 작성 성공:", newComment);
+
+	        // 새 댓글을 화면에 추가
+	        const container = document.getElementById("commentListContainer");
+	        const isOwner = document.getElementById("userId").value == newComment.user.id;
+	        
+            // Escape 처리하여 onclick 속성에서 문제가 없도록 수정
+            const escapedContent = newComment.content
+            	.replace(/'/g, "\\'")
+            	.replace(/"/g, '\\"')
+            	.replace(/\n/g, "\\n");
+            
+	        container.insertAdjacentHTML("afterbegin", `
+	            <div id="comment-\${newComment.commentId}" class="border p-3 mb-3 bg-light">
+	                <p>작성자 : \${newComment.user.nickname}</p>
+	                <div style="white-space: pre-wrap;">\${newComment.content}</div>
+	                <small>\${new Date(newComment.createdAt).toLocaleString()}</small>
+	                <button class="btn btn-secondary btn-sm mt-2" onclick="loadReplies(${newComment.commentId})">답글 보기</button>
+	                <button class="btn btn-primary btn-sm mt-2" onclick="showReplyForm(\${newComment.commentId}, 0, \${newComment.level})">작성</button>
+                    <div class="comment-actions">
+	                    \${
+	                        isOwner
+	                            ? `<button class="btn btn-warning btn-sm mt-2" onclick="editComment(\${newComment.commentId}, '\${escapedContent}')">수정</button>
+	                               <button class="btn btn-danger btn-sm mt-2" onclick="deleteComment(\${newComment.commentId})">삭제</button>`
+	                            : ""
+	                    }
+	                </div>
+	                <div id="replies-\${newComment.commentId}" class="mt-2" style="display: none;"></div>
+	            </div>
+	        `);
+
+	        // 입력 필드 초기화
+	        contentField.innerHTML = "";
+	    })
+	    .catch(error => {
+	        console.error("댓글 작성 중 오류:", error);
+	        alert("댓글 작성에 실패했습니다.");
+	    });
+	}
 
 	
 	function editComment(commentId) {
@@ -650,7 +725,7 @@
 	    </div>
 	</c:if>
 
-	 <!-- 댓글 작성 폼 -->
+	<!-- 댓글 작성 폼 -->
     <div class="mb-4">
         <c:if test="${not empty user}">
             <div class="form-group mb-2">
@@ -665,6 +740,36 @@
                 onclick="submitComment(${articleId}, 0, 0);">등록</button>
         </c:if>
     </div>
+
+	<!-- 댓글 이미지 추가를 위한 테스트 코드 -->
+<%--     <!-- 댓글 작성 폼 -->
+	<div class="mb-4">
+	    <c:if test="${not empty user}">
+	        <div class="form-group mb-2">
+	            <label><strong>댓글작성</strong></label>
+	            
+	            <!-- 기존 textarea 대신 contenteditable 사용 -->
+	            <div id="commentContent" contenteditable="true" class="form-control" 
+	                 style="min-height: 100px; overflow-y: auto;" placeholder="댓글을 입력하세요"></div>
+	            
+	            <!-- 이미지 업로드 버튼 추가 -->
+	            <div class="d-flex align-items-center mt-2">
+	                <button type="button" class="btn btn-secondary btn-sm" 
+	                        onclick="document.getElementById('imageUpload').click()">이미지 업로드</button>
+	                <input type="file" id="imageUpload" class="d-none" accept="image/*" onchange="insertImage()" />
+	            </div>
+	            
+	            <!-- 숨겨진 필드 -->
+	            <input type="hidden" id="articleId" value="${articleId}" />
+	            <input type="hidden" id="userId" value="${user.id}" />
+	        </div>
+	
+	        <!-- 등록 버튼 -->
+	        <button type="button" class="btn btn-primary mt-2"
+	                onclick="submitCommentTest(${articleId}, 0, 0);">등록</button>
+	    </c:if>
+	</div>
+	     --%>
 
 	<!-- 댓글 표시 영역 -->
 	<div id="commentListContainer" class="mb-4">

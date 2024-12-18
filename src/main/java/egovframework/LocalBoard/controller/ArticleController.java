@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -99,7 +100,6 @@ public class ArticleController {
 	        pageIndexInt = totalPage;
 	    }
 	    
-	    logger.info("Pagination Info - pageIndexInt : {}, pagination.pageIndex: {}", pageIndexInt, pagination.getPageIndex());
 	    // Pagination에 현재 페이지 인덱스와 게시물 크기 설정
 	    pagination.setPageIndex(pageIndexInt);
 	    pagination.setArticleSize(10);
@@ -107,8 +107,6 @@ public class ArticleController {
 	    
 	    // 게시물 리스트 조회 (검색 조건 포함)
 	    List<Article> articleList = articleService.getArticleList(pagination);
-	    
-	    logger.info("Pagination Info All : " + pagination.toStringAll());
 	    
 	    model.addAttribute("articleList", articleList);
 	    model.addAttribute("pagination", pagination);
@@ -139,7 +137,7 @@ public class ArticleController {
 								@RequestParam("content") String content,
 								@RequestParam("files") MultipartFile[] files,
 								HttpServletRequest request) {
-		
+
 		User user = (User) request.getSession().getAttribute("user");
 		if (user != null) {
 			articleService.saveArticle(user, title, content, files, request);
@@ -208,57 +206,56 @@ public class ArticleController {
 
 	    // 정상적으로 접근한 경우 게시글 수정 페이지로 이동
 	    model.addAttribute("article", article);
+	    
+	    List<ArticleFile> articleFiles = articleService.getArticleFileByArticleId(article);
+	    for (ArticleFile file : articleFiles) {
+	        double fileSizeInKB = file.getFileSize() / 1024.0;
+	        String roundedSize = String.format("%.1f", fileSizeInKB); // 소수점 첫째 자리 반올림
+	        file.setFormattedFileSize(roundedSize + "KB"); // 문자열로 저장
+	    }
+	    model.addAttribute("articleFiles", articleFiles);
+	    
 	    return "articleUpdate";
 	}
-
+	
 	// 게시글 업데이트
 	@PostMapping("/update/{articleId}")
-	public String articleUpdate(@PathVariable("articleId") int articleId,
-	                            @RequestParam("content") String content,
-	                            HttpServletRequest request,
-	                            Model model) {
-	    
-		Article article = articleService.articleDetail(articleId);
+	public ResponseEntity<Map<String, Object>> articleUpdate(@PathVariable("articleId") int articleId,
+															@RequestParam("content") String content,
+													        @RequestParam(value = "existingFiles", required = false) List<Integer> existingFiles,
+															@RequestParam("files") MultipartFile[] files,
+															HttpServletRequest request) {
+
+		Map<String, Object> response = new HashMap<>();
+	    System.out.println("update files : " + files);
+	    System.out.println("update files size : " + files.length);
+	    Article article = articleService.articleDetail(articleId);
 	    User user = (User) request.getSession().getAttribute("user");
 
 	    // null 체크 및 작성자 검증
 	    if (user == null || article == null || article.getUser() == null || user.getId() != article.getUser().getId()) {
-	        // 작성자와 현재 로그인한 사용자가 다르면 유효하지 않은 접근 메시지를 표시하고 목록 페이지로 리다이렉트
-	    	model.addAttribute("errorMessage", "유효한 접근이 아닙니다.");
-	        return "articleList";
+	        response.put("status", "error");
+	        response.put("message", "유효한 접근이 아닙니다.");
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
 	    }
-	    
+
+	    // 게시글 업데이트
 	    Map<String, Object> params = new HashMap<>();
 	    params.put("articleId", articleId);
 	    params.put("content", content);
-	    articleService.articleUpdate(params);
+	    articleService.articleUpdate(params, existingFiles, files, request);
 
 	    // 세션에서 검색 조건 가져오기
 	    HttpSession session = request.getSession();
-	    int pageIndex = (int) session.getAttribute("pageIndex");
-	    String searchCondition = (String) session.getAttribute("searchCondition");
-	    String searchKeyword = (String) session.getAttribute("searchKeyword");
-	    String timeRange = (String) session.getAttribute("timeRange");
-	    String sortBy = (String) session.getAttribute("sortBy");
-	    String sortOrder = (String) session.getAttribute("sortOrder");
+	    response.put("status", "success");
+	    response.put("pageIndex", session.getAttribute("pageIndex"));
+	    response.put("searchCondition", session.getAttribute("searchCondition"));
+	    response.put("searchKeyword", session.getAttribute("searchKeyword"));
+	    response.put("timeRange", session.getAttribute("timeRange"));
+	    response.put("sortBy", session.getAttribute("sortBy"));
+	    response.put("sortOrder", session.getAttribute("sortOrder"));
 
-	    // 각 파라미터를 URL 인코딩
-	    try {
-	        searchCondition = URLEncoder.encode(searchCondition, StandardCharsets.UTF_8.toString());
-	        searchKeyword = URLEncoder.encode(searchKeyword, StandardCharsets.UTF_8.toString());
-	        timeRange = URLEncoder.encode(timeRange, StandardCharsets.UTF_8.toString());
-	        sortBy = URLEncoder.encode(sortBy, StandardCharsets.UTF_8.toString());
-	        sortOrder = URLEncoder.encode(sortOrder, StandardCharsets.UTF_8.toString());
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-
-	    return "redirect:/article/articleList?pageIndex=" + pageIndex +
-	           "&searchCondition=" + searchCondition +
-	           "&searchKeyword=" + searchKeyword +
-	           "&timeRange=" + timeRange +
-	           "&sortBy=" + sortBy +
-	           "&sortOrder=" + sortOrder;
+	    return ResponseEntity.ok(response);
 	}
 
 	// 게시글 삭제
@@ -401,21 +398,14 @@ public class ArticleController {
 	                         HttpServletRequest request,
 	                         HttpServletResponse response) throws IOException {
 
-	    System.out.println("파일 다운로드 구현!");
-
 	    // 서버의 실제 업로드 파일 경로 설정
 	    String uploadPath = request.getServletContext().getRealPath("/resources/upload/");
 	    String fileUrlTrimmed = fileUrl.replace("/resources/upload/", ""); // 중복된 경로 제거
 	    String fullPath = uploadPath + fileUrlTrimmed;
 	    
-	    System.out.println("fileName: " + fileName);
-	    System.out.println("Upload Path: " + uploadPath);
-	    System.out.println("Full Path: " + fullPath);
-
 	    File file = new File(fullPath);
 
 	    if (file.exists()) {
-	        System.out.println("File exists: true");
 	        // ContentType 설정
 	        response.setContentType("application/octet-stream");
 	        response.setHeader("Content-Disposition", 

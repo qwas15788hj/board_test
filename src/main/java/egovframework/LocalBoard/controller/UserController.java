@@ -103,9 +103,12 @@ public class UserController {
     @ResponseBody
     @GetMapping(value = "/checkId", produces = "text/plain; charset=UTF-8")
     public String checkId(@RequestParam("loginId") String loginId) {
-    	logger.info("loginId 호출!!!!, " + loginId);
-        boolean isAvailable = userService.checkId(loginId);
-        logger.info("isAvailable 호출 : " + isAvailable);
+    	boolean isAvailable;
+    	if(loginId.equals("admin")) {
+    		isAvailable = false;
+    	} else {
+    		isAvailable = userService.checkId(loginId);
+    	}
         return isAvailable ? "사용 가능한 아이디입니다." : "사용할 수 없는 아이디입니다.";
     }
 	

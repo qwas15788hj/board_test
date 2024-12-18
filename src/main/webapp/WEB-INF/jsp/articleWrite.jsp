@@ -23,31 +23,6 @@
                         <h3>글 작성</h3>
                     </div>
                     <div class="card-body">
-                        <%-- <!-- 새 URL을 사용하여 폼 전송 설정 -->
-                        <form id="writeForm" action="${pageContext.request.contextPath}/article/saveArticle" method="post" enctype="multipart/form-data">
-                            <div class="mb-3">
-                                <label for="title" class="form-label"><strong>제목:</strong></label>
-                                <input type="text" name="title" id="title" class="form-control" placeholder="제목을 입력하세요" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="content" class="form-label"><strong>내용:</strong></label>
-                                <!-- CKEditor 적용할 textarea -->
-                                <textarea name="content" id="content" rows="10" style="width: 100%; height: 300px;" class="form-control" placeholder="내용을 입력하세요" required></textarea>
-                            </div>
-							<div class="d-flex align-items-center mb-3">
-							    <label class="form-label me-3"><strong>첨부파일:</strong></label>
-							    <button type="button" class="btn btn-primary" onclick="document.getElementById('fileUpload').click()">파일 선택</button>
-							</div>
-							<!-- 숨겨진 파일 입력 -->
-							<input type="file" id="fileUpload" name="file" class="d-none" accept=".txt,.png,.jpg,.jpeg,.gif,.mp4,.avi,.mov" onchange="handleFileUpload()" multiple />
-							<input type="file" name="files" id="fileUpload" multiple />
-							<!-- 파일 목록을 표시할 div -->
-							<div id="fileList" class="mt-3"></div>
-                            <div class="d-flex justify-content-between">
-                                <button type="button" class="btn btn-primary" onclick="submitContents()">저장</button>
-                                <button type="button" class="btn btn-secondary" onclick="location.href='${pageContext.request.contextPath}/article/articleList?pageIndex=${pageIndex}&searchCondition=${searchCondition}&searchKeyword=${searchKeyword}&timeRange=${timeRange}&sortBy=${sortBy}&sortOrder=${sortOrder}'">돌아가기</button>
-                            </div>
-                        </form> --%>
                         <div class="mb-3">
 						    <label for="title" class="form-label"><strong>제목:</strong></label>
 						    <input type="text" name="title" id="title" class="form-control" placeholder="제목을 입력하세요" required>
