@@ -698,7 +698,7 @@
 				</form>
 			</c:if>
 			<!-- 작성자가 아닌 경우 '신고' 버튼 표시 -->
-			<c:if test="${article.user.id != user.id}">
+			<c:if test="${article.user.id != user.id && article.user.roleType != 'ADMIN'}">
 			    <button class="btn btn-outline-danger" onclick="reportArticle()">
 			        <i class="bi bi-exclamation-triangle-fill"></i> 신고
 			    </button>

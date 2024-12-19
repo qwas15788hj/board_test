@@ -58,10 +58,12 @@ public class Article {
 	public String getFormattedCreatedAt() {
 		return formattedCreatedAt;
 	}
+	
 	@Override
 	public String toString() {
 		return "Article [articleId=" + articleId + ", user=" + user + ", title=" + title + ", content=" + content
 				+ ", views=" + views + ", createdAt=" + createdAt + ", formattedCreatedAt=" + formattedCreatedAt + "]";
 	}
+	
 	
 }

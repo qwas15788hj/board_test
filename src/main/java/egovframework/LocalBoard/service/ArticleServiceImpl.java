@@ -37,6 +37,11 @@ public class ArticleServiceImpl implements ArticleService {
 		return articleMapper.getArticleList(pagination);
 	}
 	
+	@Override
+	public List<Article> getArticleListByAdmin() {
+		return articleMapper.getArticleListByAdmin();
+	}
+	
 	// 검색조건 추가
 	@Override
 	public int getArticleCount(Pagination pagination) {
@@ -153,6 +158,5 @@ public class ArticleServiceImpl implements ArticleService {
 	public List<ArticleFile> getArticleFileByArticleId(Article article) {
 		return articleMapper.getArticleFileByArticleId(article);
 	}
-
 
 }

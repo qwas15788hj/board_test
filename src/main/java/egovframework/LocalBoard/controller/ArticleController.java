@@ -105,11 +105,21 @@ public class ArticleController {
 	    pagination.setArticleSize(10);
 	    pagination.setOffset();
 	    
+	    List<Article> adminArticleList = null;
+	    // 관리자 게시물 리스트 조회
+	    if (pageIndex.equals("1") && searchCondition.equals("전체") && searchKeyword.equals("") && timeRange.equals("") && sortBy.equals("created_at") && sortOrder.equals("desc")) {
+	    	adminArticleList = articleService.getArticleListByAdmin();
+	    }
+	    
 	    // 게시물 리스트 조회 (검색 조건 포함)
 	    List<Article> articleList = articleService.getArticleList(pagination);
 	    
+	    model.addAttribute("adminArticleList", adminArticleList);
 	    model.addAttribute("articleList", articleList);
 	    model.addAttribute("pagination", pagination);
+	    
+	    User user = (User) request.getSession().getAttribute("user");
+	    model.addAttribute("user", user);
 	    
 	    request.getSession().setAttribute("pageIndex", pageIndexInt);
 	    request.getSession().setAttribute("searchCondition", searchCondition);

@@ -27,6 +27,7 @@
                 <result property="loginId" column="login_id"/>
                 <result property="nickname" column="nickname"/>
                 <result property="pwd" column="pwd"/>
+        		<result property="roleType" column="role_type"/>
             </association>
         </association>
 
@@ -36,6 +37,7 @@
             <result property="loginId" column="login_id"/>
             <result property="nickname" column="nickname"/>
             <result property="pwd" column="pwd"/>
+        	<result property="roleType" column="role_type"/>
         </association>
     </resultMap>
 

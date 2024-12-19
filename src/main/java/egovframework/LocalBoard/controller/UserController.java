@@ -140,6 +140,12 @@ public class UserController {
 	        return "articleList";
 	    }
 	    
+	    // 닉네임 검증
+	    if (nickname.equalsIgnoreCase("관리자") || nickname.equalsIgnoreCase("admin")) {
+	        redirectAttributes.addFlashAttribute("errorMessage", "해당 이름은 사용할 수 없습니다.");
+	        return "redirect:/user/myPage";
+	    }
+	    
         // 비밀번호 암호화 후 업데이트
         user.setPwd(BCrypt.hashpw(pwd, BCrypt.gensalt()));
         user.setNickname(nickname);
