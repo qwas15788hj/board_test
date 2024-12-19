@@ -5,6 +5,7 @@ public class User {
 	private String loginId;
 	private String nickname;
 	private String pwd;
+	private String roleType;
 	
 	public int getId() {
 		return id;
@@ -30,9 +31,16 @@ public class User {
 	public void setPwd(String pwd) {
 		this.pwd = pwd;
 	}
+	public String getRoleType() {
+		return roleType;
+	}
+	public void setRoleType(String roleType) {
+		this.roleType = roleType;
+	}
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", loginId=" + loginId + ", nickname=" + nickname + ", pwd=" + pwd + "]";
+		return "User [id=" + id + ", loginId=" + loginId + ", nickname=" + nickname + ", pwd=" + pwd + ", roleType="
+				+ roleType + "]";
 	}
 	
 }

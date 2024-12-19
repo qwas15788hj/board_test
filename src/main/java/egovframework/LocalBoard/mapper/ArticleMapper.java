@@ -14,6 +14,8 @@ public interface ArticleMapper {
 
 	List<Article> getArticleList(Pagination pagination);
 
+	List<Article> getArticleListByAdmin();
+
 	int getArticleCount(Pagination pagination);
 
 	void saveArticle(Article article);

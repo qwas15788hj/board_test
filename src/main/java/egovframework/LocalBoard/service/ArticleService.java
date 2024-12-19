@@ -15,6 +15,7 @@ import egovframework.LocalBoard.dto.User;
 public interface ArticleService {
 
 	List<Article> getArticleList(Pagination pagination);
+	List<Article> getArticleListByAdmin();
 	int getArticleCount(Pagination pagination);
 	void saveArticle(User user, String title, String content, MultipartFile[] files, HttpServletRequest request);
 	Article articleDetail(int articleId);

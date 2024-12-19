@@ -18,6 +18,7 @@
             <result property="loginId" column="login_id"/>
             <result property="nickname" column="nickname"/>
             <result property="pwd" column="pwd"/>
+        	<result property="roleType" column="role_type"/>
         </association>
     </resultMap>
     
@@ -36,15 +37,16 @@
 	    FROM article a
 	        JOIN users u ON a.user_id = u.id
 	    <where>
+	    	u.role_type = "USER"
 	        <!-- 검색 조건 추가 -->
 	        <if test="searchCondition == '제목' and searchKeyword != null and searchKeyword != ''">
-	            a.title LIKE CONCAT('%', #{searchKeyword}, '%')
+	            AND a.title LIKE CONCAT('%', #{searchKeyword}, '%')
 	        </if>
 	        <if test="searchCondition == '작성자' and searchKeyword != null and searchKeyword != ''">
-	            u.nickname LIKE CONCAT('%', #{searchKeyword}, '%')
+	            AND u.nickname LIKE CONCAT('%', #{searchKeyword}, '%')
 	        </if>
 	        <if test="searchCondition == '전체' and searchKeyword != null and searchKeyword != ''">
-	            (a.title LIKE CONCAT('%', #{searchKeyword}, '%') OR u.nickname LIKE CONCAT('%', #{searchKeyword}, '%'))
+	            AND (a.title LIKE CONCAT('%', #{searchKeyword}, '%') OR u.nickname LIKE CONCAT('%', #{searchKeyword}, '%'))
 	        </if>
 	        
 	        <!-- 시간 필터 조건 추가 -->
@@ -70,20 +72,29 @@
 	    LIMIT #{articleSize} OFFSET #{offset}
 	</select>
 	
+	<select id="getArticleListByAdmin" resultMap="article">
+	    SELECT a.article_id, a.title, a.created_at, a.views, u.nickname
+	    FROM article a
+	        JOIN users u ON a.user_id = u.id
+        WHERE u.role_type = 'ADMIN'
+        ORDER BY a.article_id DESC
+	</select>
+	
 	<select id="getArticleCount" resultType="int" parameterType="egovframework.LocalBoard.dto.Pagination">
 	    SELECT COUNT(*)
 	    FROM article a
 	        JOIN users u ON a.user_id = u.id
 	    <where>
+	    	u.role_type = "USER"
 	        <!-- 검색 조건 추가 -->
 	        <if test="searchCondition == '제목' and searchKeyword != null and searchKeyword != ''">
-	            a.title LIKE CONCAT('%', #{searchKeyword}, '%')
+	            AND a.title LIKE CONCAT('%', #{searchKeyword}, '%')
 	        </if>
 	        <if test="searchCondition == '작성자' and searchKeyword != null and searchKeyword != ''">
-	            u.nickname LIKE CONCAT('%', #{searchKeyword}, '%')
+	            AND u.nickname LIKE CONCAT('%', #{searchKeyword}, '%')
 	        </if>
 	        <if test="searchCondition == '전체' and searchKeyword != null and searchKeyword != ''">
-	            (a.title LIKE CONCAT('%', #{searchKeyword}, '%') OR u.nickname LIKE CONCAT('%', #{searchKeyword}, '%'))
+	            AND (a.title LIKE CONCAT('%', #{searchKeyword}, '%') OR u.nickname LIKE CONCAT('%', #{searchKeyword}, '%'))
 	        </if>
 	        
 	        <!-- 시간 필터 조건 추가 -->
@@ -110,7 +121,7 @@
    	</insert>
     
     <select id="getArticle" parameterType="int" resultMap="article">
-    	SELECT a.article_id, a.user_id, a.title, a.content, a.views, a.created_at, u.nickname
+    	SELECT a.article_id, a.user_id, a.title, a.content, a.views, a.created_at, u.nickname, u.role_type
     	FROM article a
     		JOIN users u
     		ON a.user_id = u.id

@@ -9,10 +9,11 @@
         <result property="loginId" column="login_id"/>
         <result property="nickname" column="nickname"/>
         <result property="pwd" column="pwd"/>
+        <result property="roleType" column="role_type"/>
     </resultMap>
     
     <select id="findByLoginId" parameterType="String" resultMap="user">
-	    SELECT id, login_id, nickname, pwd
+	    SELECT id, login_id, nickname, pwd, role_type
 	    FROM users
 	    WHERE BINARY login_id = #{loginId}
 	</select>

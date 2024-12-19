@@ -50,7 +50,7 @@
 							<div class="mb-3">
 								<label for="loginId" class="form-label">아이디</label> <input
 									type="text" name="loginId" class="form-control" id="loginId"
-									maxlength="20" placeholder="아이디">
+									maxlength="20" placeholder="아이디" onkeydown="if (event.key === ' ') return false;">
 							</div>
 							<div class="mb-3">
 								<label for="pwd" class="form-label">비밀번호</label> <input

@@ -99,7 +99,7 @@
 			return false;
 		}
 		
-		if(nickname === "관리자") {
+		if(nickname === "관리자" || nickname.toLowerCase() === "admin") {
 			alert("사용할 수 없는 이름입니다.");
 			return false;
 		}
