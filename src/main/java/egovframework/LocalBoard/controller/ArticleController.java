@@ -237,8 +237,6 @@ public class ArticleController {
 															HttpServletRequest request) {
 
 		Map<String, Object> response = new HashMap<>();
-	    System.out.println("update files : " + files);
-	    System.out.println("update files size : " + files.length);
 	    Article article = articleService.articleDetail(articleId);
 	    User user = (User) request.getSession().getAttribute("user");
 
