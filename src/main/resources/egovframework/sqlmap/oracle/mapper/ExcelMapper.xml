@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">   
+
+<mapper namespace="egovframework.LocalBoard.mapper.ExcelMapper">
+    <resultMap id="excel" type="egovframework.LocalBoard.dto.ExcelDTO">
+        <result property="userName" column="user_name"/>
+        <result property="userEmail" column="user_email"/>
+        <result property="userId" column="user_id"/>
+        <result property="userPhone" column="user_phone"/>
+        <result property="userType" column="user_type"/>
+    </resultMap>
+    
+    <insert id="insertExcel" parameterType="egovframework.LocalBoard.dto.ExcelDTO">
+    	INSERT INTO excel(user_name, user_email, user_id, user_phone, user_type, reg_date)
+    	VALUES(#{userName}, #{userEmail}, #{userId}, #{userPhone}, #{userType}, NOW())
+    </insert>
+    
+    <select id="excelDownload" resultMap="excel">
+    	SELECT user_name, user_email, user_id, user_phone, user_type
+    	FROM excel
+    </select>
+</mapper>

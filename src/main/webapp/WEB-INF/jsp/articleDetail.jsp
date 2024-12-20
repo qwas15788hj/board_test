@@ -653,10 +653,37 @@
 	    });
 	}
 	
-    function reportArticle() {
-        console.log("신고됨");
-        alert("신고가 접수되었습니다."); // 사용자 피드백 제공
-    }
+	function reportArticle(articleId) {
+	    fetch(`${pageContext.request.contextPath}/article/report?articleId=\${articleId}`, {
+	        method: "POST",
+	        headers: {
+	        	"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+	        }
+	    })
+	    .then(response => {
+	        if (!response.ok) {
+	            throw new Error("신고 처리 중 오류가 발생했습니다.");
+	        }
+	        return response.text();
+	    })
+	    .then(message => {
+	        alert("신고가 접수되었습니다."); // 서버 응답 메시지 표시
+	     	// 버튼 변경 로직
+	        const reportButton = document.querySelector(`button[onclick="reportArticle(${articleId})"]`);
+	        if (reportButton) {
+	            reportButton.classList.remove("btn-outline-danger");
+	            reportButton.classList.add("btn-danger");
+	            reportButton.setAttribute("disabled", "true");
+	            reportButton.innerHTML = `
+	                <i class="bi bi-exclamation-triangle-fill"></i> 신고됨
+	            `;
+	        }
+	    })
+	    .catch(error => {
+	        console.error("신고 처리 중 오류:", error);
+	        alert("신고 처리에 실패했습니다.");
+	    });
+	}
 
 </script>
 
@@ -699,9 +726,16 @@
 			</c:if>
 			<!-- 작성자가 아닌 경우 '신고' 버튼 표시 -->
 			<c:if test="${article.user.id != user.id && article.user.roleType != 'ADMIN'}">
-			    <button class="btn btn-outline-danger" onclick="reportArticle()">
-			        <i class="bi bi-exclamation-triangle-fill"></i> 신고
-			    </button>
+			    <c:if test="${reportCheck}">
+			        <button class="btn btn-danger" disabled>
+			            <i class="bi bi-exclamation-triangle-fill"></i> 신고됨
+			        </button>
+			    </c:if>
+			    <c:if test="${!reportCheck}">
+			        <button class="btn btn-outline-danger" onclick="reportArticle(${article.articleId})">
+			            <i class="bi bi-exclamation-triangle-fill"></i> 신고
+			        </button>
+			    </c:if>
 			</c:if>
 		</div>
 	</div>

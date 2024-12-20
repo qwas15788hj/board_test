@@ -20,6 +20,7 @@ import egovframework.LocalBoard.controller.ArticleController;
 import egovframework.LocalBoard.dto.Article;
 import egovframework.LocalBoard.dto.ArticleFile;
 import egovframework.LocalBoard.dto.Pagination;
+import egovframework.LocalBoard.dto.Report;
 import egovframework.LocalBoard.dto.User;
 import egovframework.LocalBoard.mapper.ArticleMapper;
 
@@ -157,6 +158,20 @@ public class ArticleServiceImpl implements ArticleService {
 	@Override
 	public List<ArticleFile> getArticleFileByArticleId(Article article) {
 		return articleMapper.getArticleFileByArticleId(article);
+	}
+
+	@Override
+	public void saveReport(Report report) {
+		articleMapper.saveReport(report);
+	}
+
+	@Override
+	public boolean checkReportByUserIdAndArticleId(int userId, int articleId) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("userId", userId);
+		params.put("articleId", articleId);
+		
+		return articleMapper.checkReportByUserIdAndArticleId(params) > 0;
 	}
 
 }

@@ -19,7 +19,9 @@ public class CommonInterceptor extends HandlerInterceptorAdapter {
             String uri = request.getRequestURI();
             
             // 로그인 및 회원가입 페이지는 예외 처리
-            if (uri.equals("/LocalBoard/user/login") || uri.equals("/LocalBoard/user/join")) {
+            if (uri.equals(request.getContextPath() + "/user/login") ||
+            	uri.equals(request.getContextPath() + "/user/join") ||
+            	uri.startsWith(request.getContextPath() + "/excel")) {
                 return true; // 로그인 및 회원가입 페이지는 예외적으로 통과시킴
             }
 

@@ -30,6 +30,12 @@
     	<result property="fileUrl" column="file_url"/>
     	<result property="fileSize" column="file_size"/>
    	</resultMap>
+   	
+   	<resultMap id="report" type="egovframework.LocalBoard.dto.Report">
+	   	<result property="id" column="id"/>
+	   	<result property="articleId" column="article_id"/>
+	   	<result property="userId" column="user_id"/>
+   	</resultMap>
     
  	<select id="getArticleList" resultMap="article" parameterType="egovframework.LocalBoard.dto.Pagination">
 	    SELECT a.article_id, a.title, a.content, a.created_at, a.views,
@@ -174,5 +180,16 @@
 	        </foreach>
 	    </if>
 	</delete>
+	
+	<insert id="saveReport" parameterType="egovframework.LocalBoard.dto.Report">
+		INSERT INTO report (article_id, user_id)
+		VALUES (#{articleId}, #{userId});
+	</insert>
+	
+	<select id="checkReportByUserIdAndArticleId" parameterType="map" resultType="int">
+		SELECT count(*)
+		FROM report
+		WHERE user_id = #{userId} AND article_id = #{articleId}
+	</select>
 
 </mapper>

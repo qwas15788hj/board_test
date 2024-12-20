@@ -123,6 +123,15 @@ public class UserController {
         return "myPage";
     }
     
+    // 관리자 페이지
+//    @GetMapping("/adminPage")
+//    public String adminPage(HttpServletRequest request) {
+//    	User user = (User) request.getSession().getAttribute("user");
+//    	if (!user.getRoleType().equals("ADMIN")){ {
+//    		
+//    	}
+//    }
+    
     // 유저 정보 수정
     @PostMapping("/modify")
     public String modifyUserProfile(@RequestParam("userId") int userId,
