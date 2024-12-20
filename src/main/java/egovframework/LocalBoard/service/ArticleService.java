@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import egovframework.LocalBoard.dto.Article;
 import egovframework.LocalBoard.dto.ArticleFile;
 import egovframework.LocalBoard.dto.Pagination;
+import egovframework.LocalBoard.dto.Report;
 import egovframework.LocalBoard.dto.User;
 
 public interface ArticleService {
@@ -26,5 +27,7 @@ public interface ArticleService {
 	int getArticleCountByUserId(int userId);
 	List<Article> getArticlesByUserIdWithLimit(Map<String, Object> params);
 	List<ArticleFile> getArticleFileByArticleId(Article article);
+	void saveReport(Report report);
+	boolean checkReportByUserIdAndArticleId(int userId, int articleId);
 
 }

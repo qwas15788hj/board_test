@@ -43,6 +43,7 @@ import egovframework.LocalBoard.dto.Article;
 import egovframework.LocalBoard.dto.ArticleFile;
 import egovframework.LocalBoard.dto.Comment;
 import egovframework.LocalBoard.dto.Pagination;
+import egovframework.LocalBoard.dto.Report;
 import egovframework.LocalBoard.dto.SmarteditorVO;
 import egovframework.LocalBoard.dto.User;
 import egovframework.LocalBoard.service.ArticleService;
@@ -184,6 +185,10 @@ public class ArticleController {
 	    model.addAttribute("searchCondition", searchCondition);
 	    model.addAttribute("searchKeyword", searchKeyword);
 	    model.addAttribute("timeRange", timeRange);
+	    
+	    boolean reportCheck = articleService.checkReportByUserIdAndArticleId(user.getId(), articleId);
+	    System.out.println("reportCheck : " + reportCheck);
+	    model.addAttribute("reportCheck", reportCheck);
 
 	    return "articleDetail";
 	}
@@ -431,6 +436,26 @@ public class ArticleController {
 	        response.getWriter().write("File not found.");
 	    }
 	}
+	
+	@PostMapping("/report")
+	public ResponseEntity<String> submitReport(@RequestParam int articleId, HttpServletRequest request) {
+	    // 세션에서 유저 정보 가져오기
+	    User user = (User) request.getSession().getAttribute("user");
+	    if (user == null) {
+	        return ResponseEntity.status(401).body("로그인이 필요합니다.");
+	    }
 
+	    int userId = user.getId();
+
+	    // Report 객체 생성 및 데이터 설정
+	    Report report = new Report();
+	    report.setArticleId(articleId);
+	    report.setUserId(user.getId());
+
+	    // 신고 저장
+	    articleService.saveReport(report);
+
+	    return ResponseEntity.ok("신고가 접수되었습니다.");
+	}
 
 }

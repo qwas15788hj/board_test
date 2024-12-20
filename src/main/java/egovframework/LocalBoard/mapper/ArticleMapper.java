@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Mapper;
 import egovframework.LocalBoard.dto.Article;
 import egovframework.LocalBoard.dto.ArticleFile;
 import egovframework.LocalBoard.dto.Pagination;
+import egovframework.LocalBoard.dto.Report;
 
 @Mapper
 public interface ArticleMapper {
@@ -39,5 +40,9 @@ public interface ArticleMapper {
 	List<ArticleFile> getArticleFileByArticleId(Article article);
 
 	void deleteFile(Map<String, Object> deleteParams);
+
+	void saveReport(Report report);
+
+	int checkReportByUserIdAndArticleId(Map<String, Object> params);
 
 }
