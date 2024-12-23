@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import egovframework.LocalBoard.dto.Article;
+import egovframework.LocalBoard.dto.ReportedArticle;
 import egovframework.LocalBoard.dto.User;
 import egovframework.LocalBoard.mapper.UserMapper;
 import egovframework.LocalBoard.service.ArticleService;
@@ -124,13 +126,20 @@ public class UserController {
     }
     
     // 관리자 페이지
-//    @GetMapping("/adminPage")
-//    public String adminPage(HttpServletRequest request) {
-//    	User user = (User) request.getSession().getAttribute("user");
-//    	if (!user.getRoleType().equals("ADMIN")){ {
-//    		
-//    	}
-//    }
+    @GetMapping("/adminPage")
+    public String adminPage(HttpServletRequest request, Model model) {
+    	User user = (User) request.getSession().getAttribute("user");
+    	if (!user.getRoleType().equals("ADMIN")){
+    		model.addAttribute("errorMessage", "유효한 접근이 아닙니다.");
+    		return "articleList";
+    	}
+    	
+    	List<ReportedArticle> reportedArticleList = articleService.getReportedArticleList();
+    	System.out.println(reportedArticleList);
+    	model.addAttribute("reportedArticleList", reportedArticleList);
+    	
+    	return "adminPage";
+    }
     
     // 유저 정보 수정
     @PostMapping("/modify")

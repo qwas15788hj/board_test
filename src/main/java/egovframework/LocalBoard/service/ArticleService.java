@@ -11,6 +11,7 @@ import egovframework.LocalBoard.dto.Article;
 import egovframework.LocalBoard.dto.ArticleFile;
 import egovframework.LocalBoard.dto.Pagination;
 import egovframework.LocalBoard.dto.Report;
+import egovframework.LocalBoard.dto.ReportedArticle;
 import egovframework.LocalBoard.dto.User;
 
 public interface ArticleService {
@@ -29,5 +30,6 @@ public interface ArticleService {
 	List<ArticleFile> getArticleFileByArticleId(Article article);
 	void saveReport(Report report);
 	boolean checkReportByUserIdAndArticleId(int userId, int articleId);
+	List<ReportedArticle> getReportedArticleList();
 
 }

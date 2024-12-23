@@ -36,6 +36,17 @@
 	   	<result property="articleId" column="article_id"/>
 	   	<result property="userId" column="user_id"/>
    	</resultMap>
+   	
+   	<resultMap id="reportedArticle" type="egovframework.LocalBoard.dto.ReportedArticle">
+	   	<result property="articleId" column="article_id"/>
+	   	<result property="title" column="title"/>
+	   	<result property="createdAt" column="created_at"/>
+	   	<result property="reportCount" column="report_count"/>
+   	    <association property="user" column="user_id" javaType="egovframework.LocalBoard.dto.User">
+	        <result property="id" column="user_id"/>
+	        <result property="nickname" column="nickname"/>
+	    </association>
+   	</resultMap>
     
  	<select id="getArticleList" resultMap="article" parameterType="egovframework.LocalBoard.dto.Pagination">
 	    SELECT a.article_id, a.title, a.content, a.created_at, a.views,
@@ -190,6 +201,19 @@
 		SELECT count(*)
 		FROM report
 		WHERE user_id = #{userId} AND article_id = #{articleId}
+	</select>
+	
+	<select id="getReportedArticleList" resultMap="reportedArticle">
+		SELECT a.article_id, a.title, a.created_at, u.id AS user_id, u.nickname, report_count.count AS report_count
+		FROM article a
+			JOIN users u
+			ON a.user_id = u.id
+			JOIN ( SELECT b.article_id, COUNT(*) AS count
+				   FROM report b
+				   GROUP BY b.article_id
+				   HAVING count >= 3 ) report_count
+			ON a.article_id = report_count.article_id
+		ORDER BY report_count DESC
 	</select>
 
 </mapper>

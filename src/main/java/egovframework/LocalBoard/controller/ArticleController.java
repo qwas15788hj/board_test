@@ -279,9 +279,10 @@ public class ArticleController {
 		
 		Article article = articleService.articleDetail(articleId);
 	    User user = (User) request.getSession().getAttribute("user");
-
+	    
+	    System.out.println("Delete user : " + user);
 	    // null 체크 및 작성자 검증
-	    if (user == null || article == null || article.getUser() == null || user.getId() != article.getUser().getId()) {
+	    if (user == null || article == null || article.getUser() == null || (user.getId() != article.getUser().getId() && !user.getRoleType().equals("ADMIN"))) {
 	        // 작성자와 현재 로그인한 사용자가 다르면 유효하지 않은 접근 메시지를 표시하고 목록 페이지로 리다이렉트
 	    	model.addAttribute("errorMessage", "유효한 접근이 아닙니다.");
 	        return "articleList";
