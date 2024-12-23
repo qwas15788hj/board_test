@@ -136,6 +136,11 @@
         });
 
     });
+	
+    function confirmDelete() {
+        return confirm("정말 탈퇴하시겠습니까?");
+    }
+
 
 </script>
 <style>
@@ -227,7 +232,7 @@
 				</form>
 				<!-- 회원탈퇴 버튼 -->
 				<form action="${pageContext.request.contextPath}/user/remove"
-					method="post" class="d-inline">
+					method="post" class="d-inline" onsubmit="return confirmDelete();">
 					<!-- <input type="hidden" name="_method" value="DELETE"> -->
 					<input type="hidden" name="userId" value="${user.id}">
 					<button type="submit" class="btn btn-danger">회원탈퇴</button>

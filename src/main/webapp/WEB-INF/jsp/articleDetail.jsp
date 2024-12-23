@@ -684,6 +684,10 @@
 	        alert("신고 처리에 실패했습니다.");
 	    });
 	}
+	
+    function confirmDelete() {
+        return confirm("정말 삭제하시겠습니까?");
+    }
 
 </script>
 
@@ -717,15 +721,17 @@
 				<button class="btn btn-warning me-2"
 					onclick="location.href='${pageContext.request.contextPath}/article/update/${article.articleId}'">
 					수정</button>
+			</c:if>
+			<c:if test="${article.user.id == user.id || user.roleType == 'ADMIN'}">
 				<form
 					action="${pageContext.request.contextPath}/article/delete/${article.articleId}"
-					method="post" style="display: inline-block;">
+					method="post" style="display: inline-block;" onsubmit="return confirmDelete();">
 					<input type="hidden" name="_method" value="delete">
 					<button type="submit" class="btn btn-danger">삭제</button>
 				</form>
 			</c:if>
 			<!-- 작성자가 아닌 경우 '신고' 버튼 표시 -->
-			<c:if test="${article.user.id != user.id && article.user.roleType != 'ADMIN'}">
+			<c:if test="${article.user.id != user.id && article.user.roleType != 'ADMIN' && user.roleType != 'ADMIN'}">
 			    <c:if test="${reportCheck}">
 			        <button class="btn btn-danger" disabled>
 			            <i class="bi bi-exclamation-triangle-fill"></i> 신고됨

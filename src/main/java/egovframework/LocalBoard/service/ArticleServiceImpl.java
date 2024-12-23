@@ -21,6 +21,7 @@ import egovframework.LocalBoard.dto.Article;
 import egovframework.LocalBoard.dto.ArticleFile;
 import egovframework.LocalBoard.dto.Pagination;
 import egovframework.LocalBoard.dto.Report;
+import egovframework.LocalBoard.dto.ReportedArticle;
 import egovframework.LocalBoard.dto.User;
 import egovframework.LocalBoard.mapper.ArticleMapper;
 
@@ -172,6 +173,11 @@ public class ArticleServiceImpl implements ArticleService {
 		params.put("articleId", articleId);
 		
 		return articleMapper.checkReportByUserIdAndArticleId(params) > 0;
+	}
+
+	@Override
+	public List<ReportedArticle> getReportedArticleList() {
+		return articleMapper.getReportedArticleList();
 	}
 
 }

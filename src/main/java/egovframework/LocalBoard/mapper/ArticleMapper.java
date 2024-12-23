@@ -9,6 +9,7 @@ import egovframework.LocalBoard.dto.Article;
 import egovframework.LocalBoard.dto.ArticleFile;
 import egovframework.LocalBoard.dto.Pagination;
 import egovframework.LocalBoard.dto.Report;
+import egovframework.LocalBoard.dto.ReportedArticle;
 
 @Mapper
 public interface ArticleMapper {
@@ -44,5 +45,7 @@ public interface ArticleMapper {
 	void saveReport(Report report);
 
 	int checkReportByUserIdAndArticleId(Map<String, Object> params);
+
+	List<ReportedArticle> getReportedArticleList();
 
 }

@@ -213,7 +213,7 @@
 		                            <td class="notice-row">공지</td>
 		                            <td class="notice-title">
 		                                <a href="${pageContext.request.contextPath}/article/articleDetail/${adminArticle.articleId}" 
-		                                   class="text-decoration-none">
+		                                   class="text-decoration-none" onclick="addViews(${adminArticle.articleId})">
 		                                   ${adminArticle.title}
 		                                </a>
 		                            </td>
