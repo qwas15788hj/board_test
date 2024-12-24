@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import egovframework.LocalBoard.dto.Comment;
+import egovframework.LocalBoard.dto.ReportedComment;
 import egovframework.LocalBoard.mapper.CommentMapper;
 
 @Service
@@ -75,6 +76,28 @@ public class CommentServiceImpl implements CommentService {
 	@Override
 	public Comment getCommentById(int commentId) {
 		return commentMapper.getCommentById(commentId);
+	}
+
+	@Override
+	public boolean checkReportComment(int userId, int commentId) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("userId", userId);
+		params.put("commentId", commentId);
+		
+		return commentMapper.checkReportComment(params) > 0;
+	}
+
+	@Override
+	public void saveReportComment(int userId, int commentId) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("userId", userId);
+		params.put("commentId", commentId);
+		commentMapper.saveReportComment(params);
+	}
+
+	@Override
+	public List<ReportedComment> getReportedCommentList() {
+		return commentMapper.getReportedCommentList();
 	}
 
 }

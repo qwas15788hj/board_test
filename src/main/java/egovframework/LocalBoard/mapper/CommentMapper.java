@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 
 import egovframework.LocalBoard.dto.Comment;
+import egovframework.LocalBoard.dto.ReportedComment;
 
 @Mapper
 public interface CommentMapper {
@@ -25,5 +26,11 @@ public interface CommentMapper {
 	void removeComment(int commentId);
 
 	Comment getCommentById(Integer commentId);
+
+	int checkReportComment(Map<String, Object> params);
+
+	void saveReportComment(Map<String, Object> params);
+
+	List<ReportedComment> getReportedCommentList();
 	
 }

@@ -26,6 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import egovframework.LocalBoard.dto.Article;
 import egovframework.LocalBoard.dto.ReportedArticle;
+import egovframework.LocalBoard.dto.ReportedComment;
 import egovframework.LocalBoard.dto.User;
 import egovframework.LocalBoard.mapper.UserMapper;
 import egovframework.LocalBoard.service.ArticleService;
@@ -137,6 +138,10 @@ public class UserController {
     	List<ReportedArticle> reportedArticleList = articleService.getReportedArticleList();
     	System.out.println(reportedArticleList);
     	model.addAttribute("reportedArticleList", reportedArticleList);
+    	
+    	List<ReportedComment> reportedCommentList = commentService.getReportedCommentList();
+    	System.out.println(reportedCommentList);
+    	model.addAttribute("reportedCommentList", reportedCommentList);
     	
     	return "adminPage";
     }

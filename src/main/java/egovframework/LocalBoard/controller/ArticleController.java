@@ -187,7 +187,6 @@ public class ArticleController {
 	    model.addAttribute("timeRange", timeRange);
 	    
 	    boolean reportCheck = articleService.checkReportByUserIdAndArticleId(user.getId(), articleId);
-	    System.out.println("reportCheck : " + reportCheck);
 	    model.addAttribute("reportCheck", reportCheck);
 
 	    return "articleDetail";
