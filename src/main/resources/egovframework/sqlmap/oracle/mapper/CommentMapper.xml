@@ -40,6 +40,21 @@
         	<result property="roleType" column="role_type"/>
         </association>
     </resultMap>
+    
+    <resultMap id="report" type="egovframework.LocalBoard.dto.Report">
+    	<result property="id" column="id"/>
+    	<result property="articleId" column="article_id"/>
+    	<result property="commentId" column="comment_id"/>
+    	<result property="userId" column="user_id"/>
+   	</resultMap>
+   	
+   	<resultMap id="reportedComment" type="egovframework.LocalBoard.dto.ReportedComment">
+   		<result property="articleId" column="article_id"/>
+   		<result property="content" column="content"/>
+   		<result property="nickname" column="nickname"/>
+   		<result property="createdAt" column="created_at"/>
+   		<result property="reportCount" column="report_count"/>
+   	</resultMap>
 
 	<delete id="removeCommentByUserId" parameterType="int">
 		DELETE FROM comments
@@ -161,6 +176,31 @@
 	    	JOIN users u
 	    	ON c.user_id = u.id
 	    WHERE c.comment_id = #{commentId}
+    </select>
+    
+    <select id="checkReportComment" parameterType="map" resultType="int">
+    	SELECT count(*)
+    	FROM report
+    	WHERE user_id = #{userId} AND comment_id = #{commentId}
+    </select>
+    
+    <insert id="saveReportComment" parameterType="map">
+    	INSERT INTO report(user_id, comment_id)
+    	VALUES(#{userId}, #{commentId})
+    </insert>
+    
+    <select id="getReportedCommentList" resultMap="reportedComment">
+    	SELECT c.article_id, c.content, u.nickname, c.created_at, report_count.count AS report_count
+    	FROM comments c
+    		JOIN users u
+    		ON c.user_id = u.id
+    		JOIN ( SELECT r.comment_id, count(*) AS count
+    			   FROM report r
+    			   GROUP BY r.comment_id
+    			   HAVING count >= 3 ) report_count
+ 			ON c.comment_id = report_count.comment_id
+ 		WHERE c.is_deleted = 0
+ 		ORDER BY report_count.count DESC, c.created_at DESC
     </select>
 	
 </mapper>

@@ -23,6 +23,9 @@
     // Java에서 현재 로그인된 사용자의 ID를 가져와서 currentUserId에 저장
     User user = (User) session.getAttribute("user");
     int currentUserId = (user != null) ? user.getId() : 0;
+    boolean isAdmin = (user != null) && user.getRoleType().equals("ADMIN");
+    request.setAttribute("currentUserId", currentUserId);
+    request.setAttribute("isAdmin", isAdmin);
 %>
 
 <style>
@@ -95,7 +98,7 @@
 	        const isOwner = currentUserId === comment.user.id; // 작성자와 현재 사용자 비교
 	        const content = comment.isDeleted ? "삭제된 글 입니다." : comment.content; // 삭제 여부 확인
 	
-	        // 댓글 영역 생성
+	        /* // 댓글 영역 생성
 	        const commentDiv = $(`
 	            <div id="root-\${comment.commentId}" class="border p-3 mb-3 bg-light">
 	           		<div id="comment-\${comment.commentId}" class="comment-content">
@@ -118,7 +121,53 @@
 	            </div>
 	        `);
 	
+	        container.append(commentDiv); */
+	        
+	     	// 댓글 영역 생성
+	        const commentDiv = $(`
+	            <div id="root-\${comment.commentId}" class="border p-3 mb-3 bg-light">
+	                <div id="comment-\${comment.commentId}" class="comment-content position-relative">
+	                    <p>작성자 : \${comment.user.nickname}</p>
+	                    <p style="white-space: pre-wrap;">\${content.replace(/\\n/g, "\n")}</p>
+	                    <small>\${createdAt}</small>
+	                    <small>\${comment.user.id}</small>
+	                    <small>\${currentUserId}</small>
+	                    
+	                    \${
+	                    	!isOwner
+			                    <!-- 오른쪽 상단의 ... 버튼 -->
+			                    ? `<div class="dropdown position-absolute" style="top: 10px; right: 10px;">
+				                        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenu-\${comment.commentId}" data-bs-toggle="dropdown" aria-expanded="false">
+				                            ...
+				                        </button>
+				                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu-\${comment.commentId}">
+				                            <li>
+				                                <button class="dropdown-item" onclick="reportComment(\${comment.commentId})">신고</button>
+				                            </li>
+				                        </ul>
+			                    	</div>`
+			                    : ""
+	                    }
+
+	                    <button class="btn btn-secondary btn-sm mt-2" onclick="loadReplies(\${comment.commentId})">답글 보기</button>
+	                    \${comment.isDeleted ? "" : `
+	                        <div class="comment-actions">
+	                            <button class="btn btn-primary btn-sm mt-2" onclick="showReplyForm(\${comment.commentId}, 0, 0)">작성</button>
+	                            \${
+	                                isOwner
+	                                    ? `<button class="btn btn-warning btn-sm mt-2" onclick="editComment(\${comment.commentId}, '\${comment.content}')">수정</button>
+	                                       <button class="btn btn-danger btn-sm mt-2" onclick="deleteComment(\${comment.commentId})">삭제</button>`
+	                                    : ""
+	                            }
+	                        </div>
+	                    `}
+	                </div>
+	                <div id="replies-\${comment.commentId}" class="mt-2" style="display: none;"></div>
+	            </div>
+	        `);
+
 	        container.append(commentDiv);
+
 	    });
 	}
 		
@@ -160,10 +209,27 @@
 	        
 	        // 대댓글 생성
 	        const replyDiv = $(`
-	            <div id="comment-\${reply.commentId}" class="border p-3 mb-2 bg-light" style="margin-left: \${marginLeft}px;">
+	            <div id="comment-\${reply.commentId}" class="border p-3 mb-2 bg-light position-relative" style="margin-left: \${marginLeft}px;">
 	                <p>작성자 : \${reply.user.nickname}</p>
 	                <p style="white-space: pre-wrap;">\${content.replace(/\\n/g, "\n")}</p>
 	                <small>\${createdAt}</small>
+	                
+	                \${
+                    	!isOwner
+                    	? `
+		                    <!-- 오른쪽 상단의 ... 버튼 -->
+		                    <div class="dropdown position-absolute" style="top: 10px; right: 10px;">
+		                        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenu-\${reply.commentId}" data-bs-toggle="dropdown" aria-expanded="false">
+		                            ...
+		                        </button>
+		                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu-\${reply.commentId}">
+		                            <li>
+		                                <button class="dropdown-item" onclick="reportComment(\${reply.commentId})">신고</button>
+		                            </li>
+		                        </ul>
+		                    </div>
+		                   ` : ""
+	                }
 	                \${reply.isDeleted ? "" : `
 	                    <div class="comment-actions">
 	                        <button class="btn btn-primary btn-sm mt-2" onclick="showReplyForm(\${reply.commentId}, 1, \${reply.level})">작성</button>
@@ -688,6 +754,33 @@
     function confirmDelete() {
         return confirm("정말 삭제하시겠습니까?");
     }
+    
+    function reportComment(commentId) {
+        if (!commentId) {
+            alert("댓글 ID가 유효하지 않습니다.");
+            return;
+        }
+
+        const params = new URLSearchParams();
+        params.append("commentId", commentId);
+
+        fetch(`${pageContext.request.contextPath}/comment/report`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+            },
+            body: params.toString()
+        })
+        .then(response => response.text())
+        .then(message => {
+            alert(message); // 서버 응답 메시지 표시
+        })
+        .catch(error => {
+            console.error("댓글 신고 처리 중 오류:", error);
+            alert("신고 처리에 실패했습니다.");
+        });
+    }
+
 
 </script>
 

@@ -33,10 +33,18 @@
 	    <div class="text-center mb-4">
 	        <h2 class="mb-0">관리자 페이지</h2>
 	    </div>
-	
+	    
+	    <!-- 간격 추가 -->
+	    <div class="my-5"></div>
+		
 	    <!-- 신고된 게시글 테이블 -->
+	    <div class="d-flex justify-content-between align-items-center mb-4">
+		    <h4 class="text-danger mb-0">신고된 게시글 목록</h4>
+		    <button type="button" onclick="location.href='${pageContext.request.contextPath}/article/articleList'" class="btn btn-secondary">
+		        게시글 목록으로
+		    </button>
+		</div>
 	    <c:if test="${not empty reportedArticleList}">
-	        <h4 class="text-danger mb-4">신고된 게시글 목록</h4>
 	        <table class="table table-hover">
 	            <thead class="table-light">
 	                <tr>
@@ -69,10 +77,53 @@
 	    <!-- 신고된 게시글이 없을 때 -->
 	    <c:if test="${empty reportedArticleList}">
 	        <div class="alert alert-info text-center" role="alert">
-	            신고된 게시글이 없습니다.
+	            	신고된 게시글이 없습니다.
+	        </div>
+	    </c:if>
+	    
+	    <!-- 간격 추가 -->
+		<div class="my-5"></div>
+	    
+    	<!-- 댓글 신고 목록 -->
+	    <h4 class="text-danger mb-4">신고된 댓글 목록</h4>
+	    <c:if test="${not empty reportedCommentList}">
+	        <table class="table table-hover">
+	            <thead class="table-light">
+	                <tr>
+	                    <th scope="col" style="width: 10%;">번호</th>
+	                    <th scope="col" style="width: 40%;">내용</th>
+	                    <th scope="col" style="width: 20%;">작성자</th>
+	                    <th scope="col" style="width: 10%;">신고 수</th>
+	                    <th scope="col" style="width: 20%;">작성일</th>
+	                </tr>
+	            </thead>
+	            <tbody>
+	                <c:forEach var="reportedCommentList" items="${reportedCommentList}" varStatus="status">
+	                    <tr>
+	                        <td>${status.index + 1}</td>
+	                        <td>
+	                            <a href="${pageContext.request.contextPath}/article/articleDetail/${reportedCommentList.articleId}"
+	                            	class="article-title text-decoration-none">
+	                                ${reportedCommentList.content}
+	                            </a>
+	                        </td>
+	                        <td>${reportedCommentList.nickname}</td>
+	                        <td><span class="text-decoration-none text-danger">${reportedCommentList.reportCount}</span></td>
+	                        <td>${reportedCommentList.createdAt}</td>
+	                    </tr>
+	                </c:forEach>
+	            </tbody>
+	        </table>
+	    </c:if>
+	
+	    <!-- 신고된 게시글이 없을 때 -->
+	    <c:if test="${empty reportedCommentList}">
+	        <div class="alert alert-info text-center" role="alert">
+	            	신고된 게시글이 없습니다.
 	        </div>
 	    </c:if>
 	</div>
+	
 
 </body>
 </html>

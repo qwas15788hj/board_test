@@ -182,6 +182,36 @@ public class CommentController {
         }
     }
     
+    @PostMapping("report")
+    public ResponseEntity<?> reportComment(@RequestParam("commentId") int commentId, HttpServletRequest request) {
+    	
+    	try {
+    		User user = (User) request.getSession().getAttribute("user");
+    		
+    		if(user == null) {
+    			return createResponse("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
+    		}
+    		
+    		int userId = user.getId();
+    		
+    		boolean checkReported = commentService.checkReportComment(userId, commentId);
+    		if(checkReported) {
+    			System.out.println("이미 신고됨!!");
+    			return createResponse("이미 신고한 댓글입니다.", HttpStatus.CONFLICT);
+    		}
+    		
+    		System.out.println("신고 로직 시작");
+    		commentService.saveReportComment(userId, commentId);
+    		System.out.println("신고 로직 종료");
+    		
+            return createResponse("신고가 접수되었습니다.", HttpStatus.OK);
+    		
+    	} catch (Exception e) {
+    		e.printStackTrace();
+            return createResponse("댓글 신고에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+    }
+    
     // 재사용 가능한 메서드 추가
     private ResponseEntity<String> createResponse(String message, HttpStatus status) {
         HttpHeaders headers = new HttpHeaders();

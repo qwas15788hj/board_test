@@ -34,6 +34,7 @@
    	<resultMap id="report" type="egovframework.LocalBoard.dto.Report">
 	   	<result property="id" column="id"/>
 	   	<result property="articleId" column="article_id"/>
+	   	<result property="commentId" column="comment_id"/>
 	   	<result property="userId" column="user_id"/>
    	</resultMap>
    	
@@ -213,7 +214,7 @@
 				   GROUP BY b.article_id
 				   HAVING count >= 3 ) report_count
 			ON a.article_id = report_count.article_id
-		ORDER BY report_count DESC
+		ORDER BY report_count DESC, a.created_at DESC
 	</select>
 
 </mapper>

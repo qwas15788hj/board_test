@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 
 import egovframework.LocalBoard.dto.Comment;
+import egovframework.LocalBoard.dto.ReportedComment;
 
 public interface CommentService {
 
@@ -17,4 +18,7 @@ public interface CommentService {
 	Comment updateComment(int commentId, String content);
 	void removeComment(int commentId);
 	Comment getCommentById(int commentId);
+	boolean checkReportComment(int userId, int commentId);
+	void saveReportComment(int userId, int commentId);
+	List<ReportedComment> getReportedCommentList();
 }
