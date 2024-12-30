@@ -338,6 +338,8 @@
 	        ? $("#commentContent") 
 	        : $(`#replyContent-\${parentCommentId}`);
 	    const content = contentField.val();
+	    const fileInput = document.getElementById("imageUpload");
+	    const file = fileInput.files[0]; // 선택된 파일
 	    
 	    console.log("입력된 content 값:", content); // 입력된 값 확인
 
@@ -345,19 +347,21 @@
 	        alert("댓글 내용을 입력하세요.");
 	        return;
 	    }
+	    
+	    // FormData 객체 생성
+	    const formData = new FormData();
+	    formData.append("articleId", articleId);
+	    formData.append("userId", currentUserId);
+	    formData.append("parentCommentId", parentCommentId);
+	    formData.append("content", content);
+	    if (file) {
+	        formData.append("image", file); // 이미지 파일 추가
+	    }
 
 	    // Fetch API를 사용하여 서버로 데이터 전송
-	    fetch("${pageContext.request.contextPath}/comment/write", {
+	    fetch(`${pageContext.request.contextPath}/comment/write`, {
 	        method: "POST",
-	        headers: {
-	            "Content-Type": "application/x-www-form-urlencoded"
-	        },
-	        body: new URLSearchParams({
-	            articleId: articleId,
-	            userId: currentUserId,
-	            parentCommentId: parentCommentId,
-	            content: content.replace(/\n/g, "\\n"),
-	        })
+	        body: formData, // FormData 객체 전달
 	    })
 	    .then(response => {
 	        if (!response.ok) {
@@ -492,90 +496,14 @@
 
 	        // 입력 필드 초기화
 	        contentField.val("");
-
+            fileInput.value = ""; // 파일 입력 초기화
+            $("#imagePreviewContainer").empty(); // 이미지 미리보기 초기화
 	    })
 	    .catch(error => {
 	        console.error("댓글 작성 중 오류:", error);
 	        alert("댓글 작성에 실패했습니다.");
 	    });
 	}
-	
-	// 댓글 이미지 추가를 위한 테스트 코드
-	function submitCommentTest(articleId, parentCommentId, level) {
-	    const contentField = parentCommentId === 0 
-	        ? document.getElementById("commentContent") 
-	        : document.getElementById(`replyContent-\${parentCommentId}`);
-	    
-	    const content = contentField.innerHTML.trim(); // contenteditable의 HTML 내용
-	    
-	    console.log("입력된 content 값:", content); // 입력된 값 확인
-
-	    // 유효성 검사
-	    if (!content || content === "" || content === "<br>") {
-	        alert("댓글 내용을 입력하세요.");
-	        return;
-	    }
-
-	    // 서버로 보낼 FormData 생성
-	    const formData = new FormData();
-	    formData.append("articleId", articleId);
-	    formData.append("userId", document.getElementById("userId").value);
-	    formData.append("parentCommentId", parentCommentId);
-	    formData.append("content", content); // HTML 그대로 보냄
-
-
-	    // 서버로 Fetch API를 사용해 POST 전송
-	    fetch("${pageContext.request.contextPath}/comment/writeTest", {
-	        method: "POST",
-	        body: formData
-	    })
-	    .then(response => {
-	        if (!response.ok) {
-	            throw new Error("댓글 작성 실패");
-	        }
-	        return response.json();
-	    })
-	    .then(newComment => {
-	        console.log("댓글 작성 성공:", newComment);
-
-	        // 새 댓글을 화면에 추가
-	        const container = document.getElementById("commentListContainer");
-	        const isOwner = document.getElementById("userId").value == newComment.user.id;
-	        
-            // Escape 처리하여 onclick 속성에서 문제가 없도록 수정
-            const escapedContent = newComment.content
-            	.replace(/'/g, "\\'")
-            	.replace(/"/g, '\\"')
-            	.replace(/\n/g, "\\n");
-            
-	        container.insertAdjacentHTML("afterbegin", `
-	            <div id="comment-\${newComment.commentId}" class="border p-3 mb-3 bg-light">
-	                <p>작성자 : \${newComment.user.nickname}</p>
-	                <div style="white-space: pre-wrap;">\${newComment.content}</div>
-	                <small>\${new Date(newComment.createdAt).toLocaleString()}</small>
-	                <button class="btn btn-secondary btn-sm mt-2" onclick="loadReplies(${newComment.commentId})">답글 보기</button>
-	                <button class="btn btn-primary btn-sm mt-2" onclick="showReplyForm(\${newComment.commentId}, 0, \${newComment.level})">작성</button>
-                    <div class="comment-actions">
-	                    \${
-	                        isOwner
-	                            ? `<button class="btn btn-warning btn-sm mt-2" onclick="editComment(\${newComment.commentId}, '\${escapedContent}')">수정</button>
-	                               <button class="btn btn-danger btn-sm mt-2" onclick="deleteComment(\${newComment.commentId})">삭제</button>`
-	                            : ""
-	                    }
-	                </div>
-	                <div id="replies-\${newComment.commentId}" class="mt-2" style="display: none;"></div>
-	            </div>
-	        `);
-
-	        // 입력 필드 초기화
-	        contentField.innerHTML = "";
-	    })
-	    .catch(error => {
-	        console.error("댓글 작성 중 오류:", error);
-	        alert("댓글 작성에 실패했습니다.");
-	    });
-	}
-
 	
 	function editComment(commentId) {
 	    console.log("editComment 호출됨:", commentId);
@@ -797,6 +725,60 @@
             alert("신고 처리에 실패했습니다.");
         });
     }
+    
+    function handleImagePreview(input) {
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        previewContainer.innerHTML = ''; // 기존 미리보기 초기화
+
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+
+            // 이미지 파일인지 확인
+            if (!file.type.startsWith('image/')) {
+                alert('이미지 파일만 선택할 수 있습니다.');
+                return;
+            }
+
+            // 미리보기 이미지 추가
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                // 이미지 요소 생성
+                const imgWrapper = document.createElement('div');
+                imgWrapper.style.position = 'relative';
+                imgWrapper.style.display = 'inline-block';
+                imgWrapper.style.marginRight = '10px';
+                
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.maxWidth = '100px';
+                img.style.maxHeight = '100px';
+                img.style.borderRadius = '5px';
+                imgWrapper.appendChild(img);
+
+                // 삭제 버튼 추가
+                const removeButton = document.createElement('button');
+                removeButton.innerText = 'X';
+                removeButton.style.position = 'absolute';
+                removeButton.style.top = '0';
+                removeButton.style.right = '0';
+                removeButton.style.backgroundColor = 'red';
+                removeButton.style.color = 'white';
+                removeButton.style.border = 'none';
+                removeButton.style.borderRadius = '50%';
+                removeButton.style.cursor = 'pointer';
+                removeButton.onclick = function () {
+                    previewContainer.innerHTML = '';
+                    input.value = ''; // 파일 초기화
+                };
+                imgWrapper.appendChild(removeButton);
+
+                previewContainer.appendChild(imgWrapper);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+
 
 
 </script>
@@ -876,50 +858,36 @@
 	</c:if>
 
 	<!-- 댓글 작성 폼 -->
-    <div class="mb-4">
-        <c:if test="${not empty user}">
-            <div class="form-group mb-2">
-                <label><strong>댓글작성</strong></label>
-                <textarea id="commentContent" rows="3" class="form-control"
-                    placeholder="댓글을 입력하세요" maxlength="50" required
-                    oninput="checkCommentLength()"></textarea>
-                <input type="hidden" id="articleId" value="\${articleId}" />
-                <input type="hidden" id="userId" value="\${user.id}" />
-            </div>
-            <button type="button" class="btn btn-primary mt-2"
-                onclick="submitComment(${articleId}, 0, 0);">등록</button>
-        </c:if>
-    </div>
-
-	<!-- 댓글 이미지 추가를 위한 테스트 코드 -->
-<%--     <!-- 댓글 작성 폼 -->
 	<div class="mb-4">
 	    <c:if test="${not empty user}">
-	        <div class="form-group mb-2">
+	        <div class="form-group mb-2 comment-inbox">
 	            <label><strong>댓글작성</strong></label>
 	            
-	            <!-- 기존 textarea 대신 contenteditable 사용 -->
-	            <div id="commentContent" contenteditable="true" class="form-control" 
-	                 style="min-height: 100px; overflow-y: auto;" placeholder="댓글을 입력하세요"></div>
-	            
-	            <!-- 이미지 업로드 버튼 추가 -->
+	            <!-- 텍스트 입력 영역 -->
+	            <textarea id="commentContent" rows="3" class="form-control"
+	                      placeholder="댓글을 입력하세요" maxlength="50" required
+	                      oninput="checkCommentLength()"></textarea>
+	
+	            <!-- 이미지 미리보기 및 첨부 영역 -->
+	            <div id="imagePreviewContainer" class="d-flex flex-wrap mt-2"></div>
+	
+	            <!-- 버튼 영역 -->
 	            <div class="d-flex align-items-center mt-2">
-	                <button type="button" class="btn btn-secondary btn-sm" 
-	                        onclick="document.getElementById('imageUpload').click()">이미지 업로드</button>
-	                <input type="file" id="imageUpload" class="d-none" accept="image/*" onchange="insertImage()" />
+	                <label for="imageUpload" class="btn btn-light me-2">
+	                    <i class="bi bi-camera"></i> 사진 추가
+	                </label>
+	                <input type="file" id="imageUpload" accept="image/*" style="display: none;" onchange="handleImagePreview(this)" />
+	                
+	                <button type="button" class="btn btn-primary"
+	                        onclick="submitComment(${articleId}, 0, 0);">등록</button>
 	            </div>
-	            
-	            <!-- 숨겨진 필드 -->
+	
 	            <input type="hidden" id="articleId" value="${articleId}" />
 	            <input type="hidden" id="userId" value="${user.id}" />
 	        </div>
-	
-	        <!-- 등록 버튼 -->
-	        <button type="button" class="btn btn-primary mt-2"
-	                onclick="submitCommentTest(${articleId}, 0, 0);">등록</button>
 	    </c:if>
 	</div>
-	     --%>
+
 
 	<!-- 댓글 표시 영역 -->
 	<div id="commentListContainer" class="mb-4">

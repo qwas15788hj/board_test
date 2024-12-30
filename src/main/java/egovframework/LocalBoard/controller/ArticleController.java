@@ -189,7 +189,7 @@ public class ArticleController {
 	    boolean reportCheck = articleService.checkReportByUserIdAndArticleId(user.getId(), articleId);
 	    model.addAttribute("reportCheck", reportCheck);
 
-	    return "articleDetail";
+	    return "articleDetailTest";
 	}
 	
 	// 조회수 증가
