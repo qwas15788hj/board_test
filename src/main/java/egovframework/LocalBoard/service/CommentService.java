@@ -1,5 +1,6 @@
 package egovframework.LocalBoard.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +17,7 @@ public interface CommentService {
 	List<Comment> getRepliesByCommentId(int commentId);
 	Comment writeComment(Map<String, Object> paramMap);
 	Comment updateComment(int commentId, String content);
-	void removeComment(int commentId);
+	void removeComment(HashMap<String, Object> params);
 	Comment getCommentById(int commentId);
 	boolean checkReportComment(int userId, int commentId);
 	void saveReportComment(int userId, int commentId);

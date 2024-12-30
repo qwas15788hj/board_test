@@ -163,15 +163,15 @@
     	WHERE comment_id = #{commentId}
     </update>
 	
-	<update id="removeComment" parameterType="int">
+	<update id="removeComment" parameterType="map">
 		UPDATE comments
-		SET is_deleted = 1
+		SET is_deleted = #{isDeleted}
 		WHERE comment_id = #{commentId}
 	</update>
 
     <select id="getCommentById" parameterType="Integer" resultMap="comment">
 	    SELECT c.comment_id, c.article_id, c.user_id, c.parent_comment_id,
-	           c.content, c.created_at,u.nickname
+	           c.content, c.created_at, u.nickname, u.role_type
 	    FROM comments c
 	    	JOIN users u
 	    	ON c.user_id = u.id

@@ -69,8 +69,8 @@ public class CommentServiceImpl implements CommentService {
 	}
 
 	@Override
-	public void removeComment(int commentId) {
-		commentMapper.removeComment(commentId);
+	public void removeComment(HashMap<String, Object> params) {
+		commentMapper.removeComment(params);
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package egovframework.LocalBoard.mapper;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +24,7 @@ public interface CommentMapper {
 	
 	void updateComment(Map<String, Object> params);
 
-	void removeComment(int commentId);
+	void removeComment(HashMap<String, Object> params);
 
 	Comment getCommentById(Integer commentId);
 
