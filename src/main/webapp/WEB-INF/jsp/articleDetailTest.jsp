@@ -89,7 +89,7 @@
 	        .catch(error => console.error('댓글 로드 실패:', error));
 	}
 	
-		// root 댓글 렌더링 함수
+	// root 댓글 렌더링 함수
 	function renderComments(comments, container) {
 	    container.empty(); // 기존 댓글 초기화
 	
@@ -100,31 +100,6 @@
 	        					: comment.isDeleted === 2 ? "관리자에 의해 삭제된 글 입니다."
 	        							: comment.content;
 	        const isAdmin = ${isAdmin};
-	
-	        /* // 댓글 영역 생성
-	        const commentDiv = $(`
-	            <div id="root-\${comment.commentId}" class="border p-3 mb-3 bg-light">
-	           		<div id="comment-\${comment.commentId}" class="comment-content">
-	                    <p>작성자 : \${comment.user.nickname}</p>
-	                    <p style="white-space: pre-wrap;">\${content.replace(/\\n/g, "\n")}</p>
-	                    <small>\${createdAt}</small>
-	                    <button class="btn btn-secondary btn-sm mt-2" onclick="loadReplies(\${comment.commentId})">답글 보기</button>
-	                    \${comment.isDeleted ? "" : `
-	                        <div class="comment-actions">
-		                        <button class="btn btn-primary btn-sm mt-2" onclick="showReplyForm(\${comment.commentId}, 0, 0)">작성</button>
-		                        \${
-		                            isOwner
-		                                ? `<button class="btn btn-warning btn-sm mt-2" onclick="editComment(\${comment.commentId}, '\${comment.content}')">수정</button>
-		                                   <button class="btn btn-danger btn-sm mt-2" onclick="deleteComment(\${comment.commentId})">삭제</button>`
-		                                : ""}
-	                        </div>
-	                    `}
-	                </div>
-	                <div id="replies-\${comment.commentId}" class="mt-2" style="display: none;"></div>
-	            </div>
-	        `);
-	
-	        container.append(commentDiv); */
 	        
 	     	// 댓글 영역 생성
 	        const commentDiv = $(`
@@ -132,6 +107,18 @@
 	                <div id="comment-\${comment.commentId}" class="comment-content position-relative">
 	                    <p>작성자 : \${comment.user.nickname}</p>
 	                    <p style="white-space: pre-wrap;">\${content.replace(/\\n/g, "\n")}</p>
+	                    
+	                    <!-- 이미지 출력 -->
+	                    \${comment.image ? `
+	                    	    <a href="${pageContext.request.contextPath}\${comment.image}" target="_blank">
+	                    	        <img src="${pageContext.request.contextPath}\${comment.image}" 
+	                    	             alt="첨부 이미지" 
+	                    	             class="img-fluid mt-2" 
+	                    	             style="max-width: 100px; max-height: 100px; cursor: pointer;">
+	                    	    </a>
+	                    	` : ""}
+	                    <p></p>
+
 	                    <small>\${createdAt}</small>
 	                    
 	                    \${
