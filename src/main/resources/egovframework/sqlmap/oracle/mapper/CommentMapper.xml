@@ -11,6 +11,7 @@
         <result property="content" column="content"/>
         <result property="createdAt" column="created_at"/>
         <result property="isDeleted" column="is_deleted"/>
+        <result property="image" column="image"/>
         <result property="level" column="level"/>
 
         <!-- Comment의 Article 정보 매핑 -->
@@ -68,7 +69,7 @@
 	
 	<select id="getRootComments" parameterType="int" resultMap="comment">
 	    SELECT c.comment_id, c.content,  c.user_id, c.parent_comment_id,
-	           c.article_id, c.created_at, c.is_deleted, u.nickname
+	           c.article_id, c.created_at, c.is_deleted, c.image, u.nickname
 	    FROM comments c
 	    	JOIN users u
 	    	ON c.user_id = u.id
@@ -140,12 +141,14 @@
 	        article_id,
 	        user_id,
 	        content,
+	        image,
 	        parent_comment_id
 	    )
 	    VALUES (
 	        #{articleId},
 	        #{userId},
 	        #{content},
+	        #{imageUrl},
 	        <choose>
 	            <when test="parentCommentId == null or parentCommentId == 0">
 	                NULL

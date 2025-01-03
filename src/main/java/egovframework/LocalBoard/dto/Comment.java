@@ -14,6 +14,7 @@ public class Comment {
 	private String content;
 	private Timestamp createdAt;
 	private int isDeleted;
+	private String image;
 	private int level; // 무한 댓글을 위한 level 생성
 	
 	public int getCommentId() {
@@ -58,6 +59,12 @@ public class Comment {
 	public void setIsDeleted(int isDeleted) {
 		this.isDeleted = isDeleted;
 	}
+	public String getImage() {
+		return image;
+	}
+	public void setImage(String image) {
+		this.image = image;
+	}
 	public int getLevel() {
 		return level;
 	}
@@ -68,7 +75,6 @@ public class Comment {
 	public String toString() {
 		return "Comment [commentId=" + commentId + ", article=" + article + ", user=" + user + ", parentCommentId="
 				+ parentCommentId + ", content=" + content + ", createdAt=" + createdAt + ", isDeleted=" + isDeleted
-				+ ", level=" + level + "]";
+				+ ", image=" + image + ", level=" + level + "]";
 	}
-	
 }
